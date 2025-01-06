@@ -4,17 +4,31 @@ import { ConsoleTransportInstance, FileTransportInstance } from 'winston/lib/win
 import config from '../configs/config'
 import { EApplicationEnvironment } from '../constants/application'
 import path from 'path'
+import { red, blue, yellow, green, magenta } from 'colorette'
 import * as sourceMapSupport from 'source-map-support'
 
 // Linking Trace Support
 sourceMapSupport.install()
 
+const colorizeLevel = (level: string) => {
+    switch (level) {
+        case 'ERROR':
+            return red(level)
+        case 'INFO':
+            return blue(level)
+        case 'WARN':
+            return yellow(level)
+        default:
+            return level
+    }
+}
+
 const consoleLogFormat = format.printf((info) => {
     const { level, message, timestamp, meta = {} } = info
 
-    const customLevel = level.toUpperCase()
+    const customLevel = colorizeLevel(level.toUpperCase())
 
-    const customTimestamp = timestamp as string
+    const customTimestamp = green(timestamp as string)
 
     const customMessage = message as string
 
@@ -24,7 +38,7 @@ const consoleLogFormat = format.printf((info) => {
         colors: true
     })
 
-    const customLog = `${customLevel} [${customTimestamp}] ${customMessage}\n${customMeta}\n`
+    const customLog = `${customLevel} [${customTimestamp}] ${customMessage}\n${magenta('META')} ${customMeta}\n`
 
     return customLog
 })
@@ -43,7 +57,6 @@ const consoleTransport = (): Array<ConsoleTransportInstance> => {
 }
 
 const fileLogFormat = format.printf((info) => {
-     
     const { level, message, timestamp, meta = {} } = info
 
     const logMeta: Record<string, unknown> = {}
@@ -68,9 +81,9 @@ const fileLogFormat = format.printf((info) => {
 
     const logData = {
         level: level.toUpperCase(),
-         
+
         message,
-         
+
         timestamp,
         meta: logMeta
     }
