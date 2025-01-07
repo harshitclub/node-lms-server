@@ -7,28 +7,72 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Post {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  title     String   @db.VarChar(255)
-  content   String?
-  published Boolean  @default(false)
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+  INDIVIDUAL
 }
 
-model Profile {
-  id     Int     @id @default(autoincrement())
-  bio    String?
-  user   User    @relation(fields: [userId], references: [id])
-  userId Int     @unique
+enum AccountType {
+  ADMIN
+  COMPANY
+  EMPLOYEE
+  INDIVIDUAL
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  BLOCKED
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  email   String   @unique
-  name    String?
-  posts   Post[]
-  profile Profile?
+  id          String      @id @default(uuid())
+  firstName   String
+  lastName    String?
+  email       String      @unique
+  phone       String? // Make optional if not always required
+  username    String?     @unique // Make optional if not always required
+  empID       String?
+  accountType AccountType @default(INDIVIDUAL)
+  status      Status      @default(ACTIVE)
+
+  // Address Information (Consolidated)
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postalCode   String?
+  country      String?
+
+  // Company/Institute Information (Conditional)
+  companyName   String?
+  instituteName String?
+
+  gstin   String?
+  website String?
+
+  role                Role      @default(INDIVIDUAL)
+  password            String
+  isVerified          Boolean   @default(false)
+  verificationToken   String?
+  forgetPasswordToken String?
+  lastLogin           DateTime?
+  userAgent           String[]
+  profilePicture      String?
+  bio                 String?
+  dateOfBirth         DateTime?
+
+  socialLinks Json?
+
+  // Contact Information (Alternative to separate fields)
+  contactInfo Json? // Could store multiple phone numbers, social links, etc. if needed in the future
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
 }
+
+// use cascade to delete related fields in other schema
