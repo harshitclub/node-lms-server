@@ -5,7 +5,9 @@ import router from './routes/apiRoutes'
 import globalErrorHandler from './middlewares/globalErrorHandler'
 import responseMessage from './constants/responseMessage'
 import httpError from './utils/httpError'
-import authRouter from './routes/auth.routes'
+import adminRouter from './routes/admin.routes'
+import companyRouter from './routes/company.routes'
+import employeeRouter from './routes/emplyee.routes'
 
 const app: Application = express()
 
@@ -22,7 +24,9 @@ app.use(express.json())
 
 // Routes
 app.use('/api/v1', router)
-app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/admin', adminRouter)
+app.use('/api/v1/company', companyRouter)
+app.use('/api/v1/employee', employeeRouter)
 
 // 404 Handler
 app.use((req: Request, _: Response, next: NextFunction) => {

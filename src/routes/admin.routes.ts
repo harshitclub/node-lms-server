@@ -96,3 +96,5 @@ adminRouter
 adminRouter.patch('/individuals/:individualId/block', blockIndividual) // Block an individual
 adminRouter.patch('/individuals/:individualId/activate', activateIndividual) // Activate an individual
 adminRouter.patch('/individuals/:individualId/deactivate', deactivateIndividual) // Deactivate an individual
+
+export default adminRouter

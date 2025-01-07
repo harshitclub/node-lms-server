@@ -50,5 +50,11 @@ Company Routes:-
 /employee-active []
 /employee-inactive []
 
+Employee Routes:-
+/login []
+/me []
+/me [] (update)
+
+
 
 

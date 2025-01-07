@@ -51,3 +51,5 @@ companyRouter.patch('/employees/:employeeId/deactivate', deactivateEmployee) // 
 // Invitations (For inviting new employees)
 companyRouter.post('/invitations', sendInvitation) // Send an invitation to a new employee
 companyRouter.get('/invitations/:invitationToken', verifyInvitation) // Verify invitation and redirect to signup
+
+export default companyRouter
