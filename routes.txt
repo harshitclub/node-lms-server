@@ -40,5 +40,15 @@ Admin Routes:-
 /individual-active   []
 /individual-inactive []
 
+Company Routes:-
+/employee-signup []
+/employees []
+/employee []
+/employee-update []
+/employee-delete []
+/employee-block  []
+/employee-active []
+/employee-inactive []
+
 
 

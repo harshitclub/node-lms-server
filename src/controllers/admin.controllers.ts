@@ -1,5 +1,53 @@
 import { Request, Response, NextFunction } from 'express'
 
+// Admin Authentication Controllers
+export const adminSignup = (_: Request, res: Response, next: NextFunction): void => {
+    try {
+        res.status(501).json({ message: 'Admin signup not implemented' })
+    } catch (error) {
+        next(error)
+    }
+}
+export const adminLogin = (_: Request, res: Response, next: NextFunction): void => {
+    try {
+        res.status(501).json({ message: 'Admin login not implemented' })
+    } catch (error) {
+        next(error)
+    }
+}
+export const adminLogout = (_: Request, res: Response, next: NextFunction): void => {
+    try {
+        res.status(501).json({ message: 'Admin logout not implemented' })
+    } catch (error) {
+        next(error)
+    }
+}
+
+// Admin Self Routes (Profile Management)
+export const getMe = (_: Request, res: Response, next: NextFunction): void => {
+    try {
+        res.status(501).json({ message: 'Get admin profile not implemented' })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const updateMe = (_: Request, res: Response, next: NextFunction): void => {
+    try {
+        res.status(501).json({ message: 'Update admin profile not implemented' })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const changePassword = (_: Request, res: Response, next: NextFunction): void => {
+    try {
+        res.status(501).json({ message: 'Change admin password not implemented' })
+    } catch (error) {
+        next(error)
+    }
+}
+
 // Company Management
 
 /** Create a new company. */

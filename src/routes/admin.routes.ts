@@ -5,9 +5,13 @@ import {
     activateCompany,
     activateEmployee,
     activateIndividual,
+    adminLogin,
+    adminLogout,
+    adminSignup,
     blockCompany,
     blockEmployee,
     blockIndividual,
+    changePassword,
     createCompany,
     createEmployee,
     deactivateCompany,
@@ -24,14 +28,26 @@ import {
     getEmployees,
     getIndividualById,
     getIndividuals,
+    getMe,
     updateCompany,
     updateEmployee,
-    updateIndividual
+    updateIndividual,
+    updateMe
 } from '../controllers/admin.controllers'
 
 const adminRouter = Router()
 
-// adminRouter.use(isAdmin); // Apply admin authentication middleware to all routes
+adminRouter.post('/signup', adminSignup)
+adminRouter.post('/login', adminLogin)
+adminRouter.post('/logout', adminLogout)
+
+// Apply admin authentication middleware to all routes *after* authentication routes
+// adminRouter.use(isAdmin);
+
+// Admin Self Routes (Protected by isAdmin middleware)
+adminRouter.get('/me', getMe)
+adminRouter.patch('/me', updateMe)
+adminRouter.patch('/me/change-password', changePassword)
 
 // Company Management
 adminRouter

@@ -9,8 +9,8 @@ datasource db {
 
 enum Role {
   ADMIN
-  INSTRUCTOR
-  STUDENT
+  COMPANY
+  EMPLOYEE
   INDIVIDUAL
 }
 
@@ -27,52 +27,159 @@ enum Status {
   BLOCKED
 }
 
-model User {
-  id          String      @id @default(uuid())
-  firstName   String
-  lastName    String?
-  email       String      @unique
-  phone       String? // Make optional if not always required
-  username    String?     @unique // Make optional if not always required
-  empID       String?
-  accountType AccountType @default(INDIVIDUAL)
-  status      Status      @default(ACTIVE)
+enum Departments {
+  Administrative
+  HR
+  Operations_Delivery
+  Product_Service_Development
+  Purchasing
+  Sales
+  Marketing
+  Accounting
+  Finance
+  IT
+  Legal
+  Research_and_Development
+  Customer_Service
+  Training
+  Quality_Assurance
+  Manufacturing
+  Engineering
+  Logistics
+  Facilities
+  Security
+  Project_Management
+  Public_Relations_Communications
+  Investor_Relations
+  Compliance
+}
 
-  // Address Information (Consolidated)
-  addressLine1 String?
-  addressLine2 String?
-  city         String?
-  state        String?
-  postalCode   String?
-  country      String?
-
-  // Company/Institute Information (Conditional)
-  companyName   String?
-  instituteName String?
-
-  gstin   String?
-  website String?
-
-  role                Role      @default(INDIVIDUAL)
+model Admin {
+  id                  String      @id @default(uuid())
+  fullName            String
+  email               String      @unique
+  phone               String
+  address             Json
   password            String
-  isVerified          Boolean   @default(false)
+  accountType         AccountType @default(ADMIN)
+  role                Role        @default(ADMIN)
+  status              Status      @default(ACTIVE)
+  isVerified          Boolean     @default(false)
   verificationToken   String?
   forgetPasswordToken String?
   lastLogin           DateTime?
   userAgent           String[]
-  profilePicture      String?
-  bio                 String?
-  dateOfBirth         DateTime?
-
-  socialLinks Json?
-
-  // Contact Information (Alternative to separate fields)
-  contactInfo Json? // Could store multiple phone numbers, social links, etc. if needed in the future
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relationships
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 }
 
-// use cascade to delete related fields in other schema
+model Company {
+  id                  String      @id @default(uuid())
+  companyName         String
+  companyEmail        String      @unique
+  companyContact      String
+  industry            String?
+  address             Json?
+  country             String? // Country of residence
+  city                String? // City of residence
+  postalCode          String? // Postal or zip code
+  socialLinks         Json?
+  password            String
+  accountType         AccountType @default(COMPANY)
+  role                Role        @default(COMPANY)
+  status              Status      @default(ACTIVE)
+  companyLogo         String? // URL or path to the company logo
+  description         String? // A brief description of the company
+  website             String?
+  isVerified          Boolean     @default(false)
+  verificationToken   String?
+  forgetPasswordToken String?
+  lastLogin           DateTime?
+  userAgent           String[]
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+
+  // Relationships
+  employees       Employee[]      @relation("CompanyEmployees")
+  contactPerson   CompanyContact? @relation("CompanyContactPerson") // Make optional
+  contactPersonId String?         @unique // Add foreign key - Important and make it unique
+}
+
+model CompanyContact {
+  id             String       @id @default(uuid())
+  name           String
+  email          String       @unique
+  phone          String?
+  department     Departments?
+  empId          String?
+  jobTitle       String?
+  profilePicture String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Relations
+  company   Company? @relation("CompanyContactPerson", fields: [companyId], references: [id], onDelete: SetNull)
+  companyId String?  @unique
+}
+
+model Employee {
+  id                  String       @id @default(uuid())
+  empName             String
+  empId               String?      @unique // Employee ID (e.g., internal company ID)
+  empEmail            String       @unique
+  department          Departments?
+  dateOfBirth         DateTime? // Employee's date of birth
+  address             Json? // Employee's address information (can be a JSON object)
+  country             String? // Country of residence
+  city                String? // City of residence
+  postalCode          String? // Postal or zip code
+  jobTitle            String? // Employee's job title or position
+  profilePicture      String? // URL or path to the employee's profile picture
+  bio                 String? // A short biography or description of the employee
+  empPhone            String
+  socialLinks         Json?
+  password            String
+  accountType         AccountType  @default(EMPLOYEE)
+  role                Role         @default(EMPLOYEE)
+  status              Status       @default(ACTIVE)
+  isVerified          Boolean      @default(false)
+  verificationToken   String?
+  forgetPasswordToken String?
+  lastLogin           DateTime?
+  userAgent           String[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  // Relations
+
+  company   Company? @relation("CompanyEmployees", fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String?
+}
+
+model Individual {
+  id                  String       @id @default(uuid())
+  fullName            String
+  email               String       @unique
+  phone               String
+  socialLinks         Json?
+  department          Departments?
+  dateOfBirth         DateTime?
+  address             Json?
+  profilePicture      String? // URL or path to the profile picture
+  bio                 String? // A short biography or description
+  gender              String? // Male, Female, Other, etc.
+  country             String? // Country of residence
+  city                String? // City of residence
+  postalCode          String? // Postal or zip code
+  password            String
+  accountType         AccountType  @default(INDIVIDUAL)
+  role                Role         @default(INDIVIDUAL)
+  status              Status       @default(ACTIVE)
+  isVerified          Boolean      @default(false)
+  verificationToken   String?
+  forgetPasswordToken String?
+  lastLogin           DateTime?
+  userAgent           String[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+}
