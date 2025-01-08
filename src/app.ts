@@ -2,6 +2,7 @@ import express, { Application, NextFunction, Request, Response } from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
 import rateLimit from 'express-rate-limit'
+import compression from 'compression'
 import router from './routes/apiRoutes'
 import globalErrorHandler from './middlewares/globalErrorHandler'
 import responseMessage from './constants/responseMessage'
@@ -9,20 +10,26 @@ import httpError from './utils/httpError'
 import adminRouter from './routes/admin.routes'
 import companyRouter from './routes/company.routes'
 import employeeRouter from './routes/emplyee.routes'
+import cookieParser from 'cookie-parser'
 // use npm i npm-check-updates -g
 // to check updates by - "ncu" command
 const app: Application = express()
 
 // Middleware
+// Compress responses for all routes
+app.use(compression())
+app.use(cookieParser())
 app.use(helmet())
 app.use(
     cors({
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD'],
-        origin: ['https://client.com'],
+        origin: ['*'],
         credentials: true
     })
 )
-app.use(express.json())
+app.use(express.json({ limit: '16kb' })) // Parse JSON data with limit
+app.use(express.urlencoded({ extended: true, limit: '16kb' })) // Parse URL-encoded data with limit
+
 // Rate Limiting Configuration (Replace with your desired settings)
 const rateLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes window
@@ -30,7 +37,7 @@ const rateLimiter = rateLimit({
     message: {
         code: 'TOO_MANY_REQUESTS',
         message: 'Too many requests from this IP, please try again later.'
-    } // Customize the error message
+    }
 })
 
 // Apply rate limiting to all routes

@@ -28,6 +28,8 @@
         "@commitlint/cli": "^19.6.1",
         "@commitlint/config-conventional": "^19.6.0",
         "@eslint/js": "^9.17.0",
+        "@types/compression": "^1.7.5",
+        "@types/cookie-parser": "^1.4.8",
         "@types/cors": "^2.8.17",
         "@types/eslint__js": "^8.42.3",
         "@types/express": "^5.0.0",
@@ -48,6 +50,7 @@
     "dependencies": {
         "@prisma/client": "^6.2.0",
         "colorette": "^2.0.20",
+        "compression": "^1.7.5",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
         "cross-env": "^7.0.3",
@@ -58,7 +61,6 @@
         "helmet": "^8.0.0",
         "jsonwebtoken": "^9.0.2",
         "source-map-support": "^0.5.21",
-        "uninstall": "^0.0.0",
         "winston": "^3.17.0",
         "zod": "^3.24.1"
     }

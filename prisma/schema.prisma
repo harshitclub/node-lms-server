@@ -58,8 +58,8 @@ model Admin {
   id                  String      @id @default(uuid())
   fullName            String
   email               String      @unique
-  phone               String
-  address             Json
+  phone               String?
+  address             Json?
   password            String
   accountType         AccountType @default(ADMIN)
   role                Role        @default(ADMIN)
@@ -77,7 +77,7 @@ model Company {
   id                  String      @id @default(uuid())
   companyName         String
   companyEmail        String      @unique
-  companyContact      String
+  companyContact      String?
   industry            String?
   address             Json?
   country             String? // Country of residence
@@ -136,7 +136,7 @@ model Employee {
   jobTitle            String? // Employee's job title or position
   profilePicture      String? // URL or path to the employee's profile picture
   bio                 String? // A short biography or description of the employee
-  empPhone            String
+  empPhone            String?
   socialLinks         Json?
   password            String
   accountType         AccountType  @default(EMPLOYEE)
@@ -160,7 +160,7 @@ model Individual {
   id                  String       @id @default(uuid())
   fullName            String
   email               String       @unique
-  phone               String
+  phone               String?
   socialLinks         Json?
   department          Departments?
   dateOfBirth         DateTime?
