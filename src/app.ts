@@ -9,7 +9,8 @@ import httpError from './utils/httpError'
 import adminRouter from './routes/admin.routes'
 import companyRouter from './routes/company.routes'
 import employeeRouter from './routes/emplyee.routes'
-
+// use npm i npm-check-updates -g
+// to check updates by - "ncu" command
 const app: Application = express()
 
 // Middleware
