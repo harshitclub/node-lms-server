@@ -1,11 +1,57 @@
+import { PrismaClient } from '@prisma/client'
 import { Request, Response, NextFunction } from 'express'
+import { adminSignupSchema } from '../validator/admin.validator'
+import bcrypt from 'bcryptjs'
+import { z } from 'zod'
+import httpResponse from '../utils/httpResponse'
+import httpError from '../utils/httpError'
+const prisma = new PrismaClient()
 
 // Admin Authentication Controllers
-export const adminSignup = (_: Request, res: Response, next: NextFunction): void => {
+export const adminSignup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        res.status(501).json({ message: 'Admin signup not implemented' })
+        // Validate and parse request body
+        const { fullName, email, phone, password } = await adminSignupSchema.parseAsync(req.body)
+
+        // Check if admin already exists
+        const existingAdmin = await prisma.admin.findUnique({
+            where: { email }
+        })
+        if (existingAdmin) {
+            return httpResponse(req, res, 400, 'Email already in use')
+        }
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10) // 10 salt rounds
+        // Create a new admin
+        const newAdmin = await prisma.admin.create({
+            data: {
+                fullName,
+                email,
+                phone,
+                password: hashedPassword
+            }
+        })
+
+        // Structure the response data
+        const adminData = {
+            id: newAdmin.id,
+            fullName: newAdmin.fullName,
+            email: newAdmin.email,
+            phone: newAdmin.phone,
+            createdAt: newAdmin.createdAt,
+            updatedAt: newAdmin.updatedAt
+        }
+
+        // Use httpResponse for consistent success responses
+        return httpResponse(req, res, 201, 'Admin created successfully', adminData)
     } catch (error) {
-        next(error)
+        // Handle validation errors
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, 'Validation Error', { errors: error.errors })
+        }
+
+        // Handle other errors using httpError
+        return httpError(next, error, req, 500)
     }
 }
 export const adminLogin = (_: Request, res: Response, next: NextFunction): void => {

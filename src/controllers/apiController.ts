@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import httpResponse from '../utils/httpResponse'
 import responseMessage from '../constants/responseMessage'
-import httpError from '../utils/httpError'
 import { getApplicationHealth, getSystemHealth } from '../utils/quicker'
+import httpError from '../utils/httpError'
 
 /**
  * Self-check endpoint - Checks the basic functionality of the API.
