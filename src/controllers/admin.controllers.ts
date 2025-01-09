@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import { Request, Response, NextFunction } from 'express'
 import { adminSignupSchema } from '../validator/admin.validator'
-import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import httpResponse from '../utils/httpResponse'
 import httpError from '../utils/httpError'
+import { hashPassword } from '../utils/hashPassword'
 const prisma = new PrismaClient()
 
 // Admin Authentication Controllers
@@ -20,8 +20,7 @@ export const adminSignup = async (req: Request, res: Response, next: NextFunctio
         if (existingAdmin) {
             return httpResponse(req, res, 400, 'Email already in use')
         }
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10) // 10 salt rounds
+        const hashedPassword = await hashPassword(password)
         // Create a new admin
         const newAdmin = await prisma.admin.create({
             data: {
