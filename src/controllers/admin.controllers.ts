@@ -4,9 +4,12 @@ import { adminLoginSchema, adminSignupSchema } from '../validator/admin.validato
 import { z } from 'zod'
 import httpResponse from '../utils/httpResponse'
 import httpError from '../utils/httpError'
-import { hashPassword } from '../utils/hashPassword'
+import { hashPassword } from '../utils/password/hashPassword'
 import apiMessages from '../constants/apiMessages'
-import comparePassword from '../utils/comparePassword'
+import comparePassword from '../utils/password/comparePassword'
+import { UserPayload } from '../types/tokens.type'
+import { generateTokens } from '../utils/tokens/tokens'
+// import config from '../configs/config'
 const prisma = new PrismaClient()
 
 // Admin Authentication Controllers
@@ -77,21 +80,50 @@ export const adminLogin = async (req: Request, res: Response, next: NextFunction
             return httpResponse(req, res, 401, apiMessages.auth.wrongCredentials)
         }
 
-        const adminData = {
-            id: admin.id,
-            fullName: admin.fullName,
-            email: admin.email,
-            phone: admin.phone,
-            address: admin.address,
-            accountType: admin.accountType,
-            role: admin.role,
-            status: admin.status,
-            isVerified: admin.isVerified,
-            userAgent: admin.userAgent,
-            createdAt: admin.createdAt
-        }
+        // const adminData = {
+        //     id: admin.id,
+        //     fullName: admin.fullName,
+        //     email: admin.email,
+        //     phone: admin.phone,
+        //     address: admin.address,
+        //     accountType: admin.accountType,
+        //     role: admin.role,
+        //     status: admin.status,
+        //     isVerified: admin.isVerified,
+        //     userAgent: admin.userAgent,
+        //     createdAt: admin.createdAt
+        // }
 
-        return httpResponse(req, res, 200, apiMessages.success.loggedIn, adminData)
+        const payload: UserPayload = {
+            id: admin.id,
+            role: admin.role,
+            accountType: admin.accountType
+        }
+        const { refreshToken, accessToken } = generateTokens(payload)
+        // Set refresh token as HTTP-only cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            // secure: config.ENV === 'production',
+            sameSite: 'strict', // recommended for security
+            path: '/',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds (or from env)
+        })
+        return httpResponse(req, res, 200, apiMessages.success.loggedIn, {
+            admin: {
+                id: admin.id,
+                fullName: admin.fullName,
+                email: admin.email,
+                phone: admin.phone,
+                address: admin.address,
+                accountType: admin.accountType,
+                role: admin.role,
+                status: admin.status,
+                isVerified: admin.isVerified,
+                userAgent: admin.userAgent,
+                createdAt: admin.createdAt,
+                token: accessToken
+            }
+        })
     } catch (error) {
         if (error instanceof z.ZodError) {
             return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
