@@ -43,3 +43,29 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
         return res.status(401).json({ message: apiMessages.auth.invalidToken })
     }
 }
+
+export const protectAdmin = (req: Request, res: Response, next: NextFunction) => {
+    protect(req, res, (err) => {
+        if (err) {
+            return next(err)
+        }
+        if (req.user && req.user.role === 'ADMIN') {
+            next()
+        } else {
+            return res.status(403).json({ message: apiMessages.error.unauthorized })
+        }
+    })
+}
+
+export const protectCompany = (req: Request, res: Response, next: NextFunction) => {
+    protect(req, res, (err) => {
+        if (err) {
+            return next(err)
+        }
+        if (req.user && req.user.role === 'COMPANY') {
+            next()
+        } else {
+            return res.status(403).json({ message: apiMessages.error.unauthorized })
+        }
+    })
+}
