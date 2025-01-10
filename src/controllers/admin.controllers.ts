@@ -5,6 +5,7 @@ import { z } from 'zod'
 import httpResponse from '../utils/httpResponse'
 import httpError from '../utils/httpError'
 import { hashPassword } from '../utils/hashPassword'
+import apiMessages from '../constants/apiMessages'
 const prisma = new PrismaClient()
 
 // Admin Authentication Controllers
@@ -18,7 +19,7 @@ export const adminSignup = async (req: Request, res: Response, next: NextFunctio
             where: { email }
         })
         if (existingAdmin) {
-            return httpResponse(req, res, 400, 'Email already in use')
+            return httpResponse(req, res, 400, apiMessages.auth.emailAlreadyInUse)
         }
         const hashedPassword = await hashPassword(password)
         // Create a new admin
@@ -42,7 +43,7 @@ export const adminSignup = async (req: Request, res: Response, next: NextFunctio
         }
 
         // Use httpResponse for consistent success responses
-        return httpResponse(req, res, 201, 'Admin created successfully', adminData)
+        return httpResponse(req, res, 201, apiMessages.admin.adminCreated, adminData)
     } catch (error) {
         // Handle validation errors
         if (error instanceof z.ZodError) {
