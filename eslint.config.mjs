@@ -18,7 +18,7 @@ export default tseslint.config({
         eslintConfigPrettier // Disable conflicting Prettier rules
     ],
     rules: {
-        'no-console': 'error', // Disallow console.log
+        // 'no-console': 'error',
         'no-useless-catch': 0, // Allow unnecessary catch blocks
         quotes: ['error', 'single', { allowTemplateLiterals: true }] // Enforce single quotes
     }

@@ -8,7 +8,7 @@ import { hashPassword } from '../utils/password/hashPassword'
 import apiMessages from '../constants/apiMessages'
 import comparePassword from '../utils/password/comparePassword'
 import { UserPayload } from '../types/tokens.type'
-import { generateTokens } from '../utils/tokens/tokens'
+import { generateTokens, verifyAccessToken } from '../utils/tokens/tokens'
 // import config from '../configs/config'
 const prisma = new PrismaClient()
 
@@ -80,20 +80,6 @@ export const adminLogin = async (req: Request, res: Response, next: NextFunction
             return httpResponse(req, res, 401, apiMessages.auth.wrongCredentials)
         }
 
-        // const adminData = {
-        //     id: admin.id,
-        //     fullName: admin.fullName,
-        //     email: admin.email,
-        //     phone: admin.phone,
-        //     address: admin.address,
-        //     accountType: admin.accountType,
-        //     role: admin.role,
-        //     status: admin.status,
-        //     isVerified: admin.isVerified,
-        //     userAgent: admin.userAgent,
-        //     createdAt: admin.createdAt
-        // }
-
         const payload: UserPayload = {
             id: admin.id,
             role: admin.role,
@@ -108,6 +94,11 @@ export const adminLogin = async (req: Request, res: Response, next: NextFunction
             path: '/',
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds (or from env)
         })
+
+        const decodedToken = verifyAccessToken(accessToken)
+
+        console.log(decodedToken)
+
         return httpResponse(req, res, 200, apiMessages.success.loggedIn, {
             admin: {
                 id: admin.id,
