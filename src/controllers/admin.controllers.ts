@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client'
 import { Request, Response, NextFunction } from 'express'
-import { adminSignupSchema } from '../validator/admin.validator'
+import { adminLoginSchema, adminSignupSchema } from '../validator/admin.validator'
 import { z } from 'zod'
 import httpResponse from '../utils/httpResponse'
 import httpError from '../utils/httpError'
 import { hashPassword } from '../utils/hashPassword'
 import apiMessages from '../constants/apiMessages'
+import comparePassword from '../utils/comparePassword'
 const prisma = new PrismaClient()
 
 // Admin Authentication Controllers
@@ -54,11 +55,49 @@ export const adminSignup = async (req: Request, res: Response, next: NextFunctio
         return httpError(next, error, req, 500)
     }
 }
-export const adminLogin = (_: Request, res: Response, next: NextFunction): void => {
+export const adminLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        res.status(501).json({ message: 'Admin login not implemented' })
+        const { email, password } = await adminLoginSchema.parseAsync(req.body)
+
+        // Check if admin exists
+        const admin = await prisma.admin.findUnique({
+            where: {
+                email
+            }
+        })
+
+        if (!admin) {
+            return httpResponse(req, res, 404, apiMessages.admin.adminNotFound)
+        }
+
+        // check password
+        const isPasswordCorrect = await comparePassword(password, admin.password)
+
+        if (!isPasswordCorrect) {
+            return httpResponse(req, res, 401, apiMessages.auth.wrongCredentials)
+        }
+
+        const adminData = {
+            id: admin.id,
+            fullName: admin.fullName,
+            email: admin.email,
+            phone: admin.phone,
+            address: admin.address,
+            accountType: admin.accountType,
+            role: admin.role,
+            status: admin.status,
+            isVerified: admin.isVerified,
+            userAgent: admin.userAgent,
+            createdAt: admin.createdAt
+        }
+
+        return httpResponse(req, res, 200, apiMessages.success.loggedIn, adminData)
     } catch (error) {
-        next(error)
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
+        }
+        // Handle other errors using httpError
+        return httpError(next, error, req, 500)
     }
 }
 export const adminLogout = (_: Request, res: Response, next: NextFunction): void => {
