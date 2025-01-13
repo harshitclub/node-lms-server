@@ -1,25 +1,27 @@
 // @ts-check
 
 import eslint from '@eslint/js'
-import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
 
-export default tseslint.config({
-    languageOptions: {
-        parserOptions: {
-            project: true, // Use the nearest tsconfig.json
-            tsconfigRootDir: import.meta.dirname // Adjust for ES modules
-        }
-    },
-    files: ['**/*.ts'], // Apply to all TypeScript files
+export default {
+    files: ['**/*.ts', '**/*.tsx'], // Apply to all TypeScript and TSX files
     extends: [
-        eslint.configs.recommended, // ESLint recommended rules
-        ...tseslint.configs.recommendedTypeChecked, // TypeScript recommended rules
-        eslintConfigPrettier // Disable conflicting Prettier rules
+        'eslint:recommended', // Shorthand for eslint.configs.recommended
+        'plugin:@typescript-eslint/recommended', // TypeScript recommended rules
+        'plugin:@typescript-eslint/recommended-type-checked', // TypeScript recommended rules with type checking
+        'prettier' // Make sure this is always last
     ],
+    parser: '@typescript-eslint/parser',
+    parserOptions: {
+        project: true,
+        tsconfigRootDir: __dirname // Use __dirname for CommonJS
+    },
     rules: {
-        // 'no-console': 'error',
-        'no-useless-catch': 0, // Allow unnecessary catch blocks
-        quotes: ['error', 'single', { allowTemplateLiterals: true }] // Enforce single quotes
+        // Add or override rules here as needed
+        '@typescript-eslint/no-unused-vars': 'warn', // Example: Warn on unused vars
+        '@typescript-eslint/explicit-function-return-type': 'off', // Allow implicit return types
+        '@typescript-eslint/no-explicit-any': 'warn', // Warn on using any type
+        'no-useless-catch': 'off',
+        quotes: ['error', 'single', { allowTemplateLiterals: true }]
     }
-})
+}

@@ -34,6 +34,7 @@ import {
     updateIndividual,
     updateMe
 } from '../controllers/admin.controllers'
+import { protect, protectAdmin } from '../middlewares/auth.middleware'
 
 const adminRouter = Router()
 
@@ -42,7 +43,7 @@ adminRouter.post('/login', adminLogin)
 adminRouter.post('/logout', adminLogout)
 
 // Apply admin authentication middleware to all routes *after* authentication routes
-// adminRouter.use(isAdmin);
+adminRouter.use(protect, protectAdmin)
 
 // Admin Self Routes (Protected by isAdmin middleware)
 adminRouter.get('/me', getMe)
