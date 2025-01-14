@@ -18,16 +18,7 @@
     },
     "author": "Harshit Kumar",
     "license": "ISC",
-    "lint-staged": {
-        "*.ts": [
-            "npm run lint:fix",
-            "npm run format:fix"
-        ]
-    },
     "devDependencies": {
-        "@commitlint/cli": "^19.6.1",
-        "@commitlint/config-conventional": "^19.6.0",
-        "@eslint/js": "^9.18.0",
         "@types/bcryptjs": "^2.4.6",
         "@types/compression": "^1.7.5",
         "@types/cookie-parser": "^1.4.8",
@@ -37,17 +28,12 @@
         "@types/jsonwebtoken": "^9.0.7",
         "@types/node": "^22.10.5",
         "@types/source-map-support": "^0.5.10",
-        "eslint": "^9.18.0",
-        "eslint-config-prettier": "^9.1.0",
         "globals": "^15.14.0",
-        "husky": "^9.1.7",
-        "lint-staged": "^15.3.0",
         "nodemon": "^3.1.9",
         "prettier": "3.4.2",
         "prisma": "^6.2.0",
         "ts-node": "^10.9.2",
-        "typescript": "^5.7.3",
-        "typescript-eslint": "^8.19.1"
+        "typescript": "^5.7.3"
     },
     "dependencies": {
         "@prisma/client": "^6.2.0",
