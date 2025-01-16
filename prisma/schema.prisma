@@ -92,8 +92,8 @@ model Company {
   industry    String?
   address     Json?
   socialLinks Json?
-  companyLogo String? // URL or path to the company logo
-  description String? // A brief description of the company
+  companyLogo String?
+  description String?
   website     String?
 
   // account information
@@ -139,15 +139,15 @@ model CompanyContact {
 model Employee {
   id                  String       @id @default(uuid())
   fullName            String
-  empId               String?      @unique // Employee ID (e.g., internal company ID)
+  empId               String?      @unique
   email               String       @unique
   department          Departments?
-  dateOfBirth         DateTime? // Employee's date of birth
-  address             Json? // Employee's address information (can be a JSON object)
+  dateOfBirth         DateTime?
+  address             Json?
   gender              String?
-  jobTitle            String? // Employee's job title or position
-  profilePicture      String? // URL or path to the employee's profile picture
-  description         String? // A short biography or description of the employee
+  jobTitle            String?
+  profilePicture      String?
+  description         String?
   phone               String?
   socialLinks         Json?
   password            String
@@ -181,9 +181,9 @@ model Individual {
   company             String?
   institute           String?
   course              String?
-  profilePicture      String? // URL or path to the profile picture
-  description         String? // A short biography or description
-  gender              String? // Male, Female, Other, etc.
+  profilePicture      String?
+  description         String?
+  gender              String?
   password            String
   accountType         AccountType  @default(INDIVIDUAL)
   role                Role         @default(INDIVIDUAL)
