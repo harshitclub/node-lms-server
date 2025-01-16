@@ -293,15 +293,18 @@ export const getCompanies = async (req: Request, res: Response, next: NextFuncti
 /** Get a specific company by ID. */
 export const getCompanyById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = await req.body
+        const { companyId } = req.params
+        console.log(companyId)
+        console.log(req.params)
 
-        if (id) {
+        if (!companyId) {
             httpResponse(req, res, 400, apiMessages.error.invalidInput)
         }
 
         const company = await prisma.company.findUnique({
-            where: { id },
+            where: { id: companyId },
             select: {
+                id: true,
                 fullName: true,
                 email: true,
                 phone: true,
