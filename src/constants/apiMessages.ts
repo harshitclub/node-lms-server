@@ -38,7 +38,10 @@ const apiMessages = {
         invalidTokenFormat: 'Invalid token format',
         accountNotVerified: 'Account not verified',
         accountLocked: 'Account is locked',
-        unauthenticated: 'Unauthenticated'
+        unauthenticated: 'Unauthenticated',
+        blocked: 'Blocked',
+        deactivate: 'Deactivated',
+        active: 'Activated'
     },
 
     // User-Specific Messages
@@ -104,7 +107,10 @@ const apiMessages = {
         employeeCreated: 'Employee created',
         employeeUpdated: 'Employee updated',
         employeeDeleted: 'Employee deleted',
-        employeeNotFound: 'Employee not found'
+        employeeNotFound: 'Employee not found',
+        employeesNotFound: 'Employees not found',
+        employeesFound: 'Employees found',
+        employeeFound: 'Employee found'
     },
 
     // Payment related messages

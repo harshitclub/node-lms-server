@@ -139,7 +139,7 @@ model CompanyContact {
 model Employee {
   id                  String       @id @default(uuid())
   fullName            String
-  empId               String?      @unique
+  empId               String?
   email               String       @unique
   department          Departments?
   dateOfBirth         DateTime?

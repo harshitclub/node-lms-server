@@ -11,6 +11,7 @@ import comparePassword from '../utils/password/comparePassword'
 import { UserPayload } from '../types/tokens.type'
 import { generateTokens } from '../utils/tokens/tokens'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
+import { employeeSignupSchema } from '../validator/employee.validator'
 const prisma = new PrismaClient()
 
 // Company Authentication Controllers
@@ -206,9 +207,7 @@ export const updateCompanyProfile = async (req: Request, res: Response, next: Ne
 
         return httpResponse(req, res, 200, apiMessages.success.updated, updatedCompany)
     } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            res.status(404).json({ message: apiMessages.admin.adminNotFound }) // Handle not found
-        } else if (error instanceof z.ZodError) {
+        if (error instanceof z.ZodError) {
             return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors }) // Zod validation errors
         }
         return httpError(next, error, req, 500)
@@ -257,27 +256,94 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
 }
 
 // Employee Management
-export const createEmployee = (_: Request, res: Response, next: NextFunction): void => {
+export const createEmployee = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        res.status(501).json({ message: 'Create employee not implemented' })
+        if (!req.user) {
+            res.status(401).json({ message: apiMessages.error.unauthorized }) // Use clear unauthorized message
+        }
+        const { id } = req.user as UserPayload
+        const { fullName, email, empId, phone, password, department, dateOfBirth, gender, jobTitle, status } = await employeeSignupSchema.parseAsync(
+            req.body
+        )
+        const company = await prisma.company.findUnique({
+            where: { id }
+        })
+
+        if (!company) {
+            return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
+        }
+
+        const employee = await prisma.employee.create({
+            data: {
+                fullName,
+                email,
+                empId,
+                phone,
+                password,
+                department,
+                dateOfBirth,
+                gender,
+                jobTitle,
+                status,
+                companyId: company.id
+            }
+        })
+
+        return httpResponse(req, res, 201, apiMessages.employee.employeeCreated, employee)
     } catch (error) {
-        next(error)
+        // Handle validation errors
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, 'Validation Error', { errors: error.errors })
+        }
+
+        // Handle other errors using httpError
+        return httpError(next, error, req, 500)
     }
 }
 
-export const getEmployees = (_: Request, res: Response, next: NextFunction): void => {
+export const getEmployees = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        res.status(501).json({ message: 'Get employees not implemented' })
+        if (!req.user) {
+            res.status(401).json({ message: apiMessages.error.unauthorized }) // Use clear unauthorized message
+        }
+        const { id } = req.user as UserPayload
+
+        const employees = await prisma.employee.findMany({
+            where: { companyId: id }
+        })
+        if (!employees.length) {
+            // Check if no employees are found
+            return httpResponse(req, res, 200, apiMessages.employee.employeeNotFound, { data: [] }) // Return empty array
+        }
+        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { data: employees })
     } catch (error) {
-        next(error)
+        // Handle other errors using httpError
+        return httpError(next, error, req, 500)
     }
 }
 
-export const getEmployeeById = (_: Request, res: Response, next: NextFunction): void => {
+export const getEmployeeById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        res.status(501).json({ message: 'Get employee by ID not implemented' })
+        if (!req.user) {
+            res.status(401).json({ message: apiMessages.error.unauthorized }) // Use clear unauthorized message
+        }
+        const { id } = req.user as UserPayload
+
+        const { employeeId } = req.params
+
+        const employee = await prisma.employee.findUnique({
+            where: {
+                id: employeeId,
+                companyId: id
+            }
+        })
+        if (!employee) {
+            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound, { data: [] })
+        }
+
+        return httpResponse(req, res, 200, apiMessages.employee.employeeFound, { data: employee })
     } catch (error) {
-        next(error)
+        return httpError(next, error, req, 500)
     }
 }
 
