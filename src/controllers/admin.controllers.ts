@@ -22,7 +22,6 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { companyUpdateSchema } from '../validator/company.validator'
 import logger from '../utils/logger'
 import generateShortId from '../utils/uIds'
-import sendVerificationMail from '../services/emails/verification'
 // import config from '../configs/config'
 const prisma = new PrismaClient()
 

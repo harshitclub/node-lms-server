@@ -1,16 +1,17 @@
 import nodemailer from 'nodemailer'
+import config from '../../configs/config'
 
 // transporter
 
 const transporter = nodemailer.createTransport({
     // @ts-ignore
-    name: 'smtp.hostinger.com',
-    host: 'smtp.hostinger.com',
+    name: config.MAIL_NAME,
+    host: config.MAIL_HOST,
     port: 465,
     secure: true,
     auth: {
-        user: 'noreply@amandaschmutzler.com',
-        pass: 'Harshit@7505'
+        user: config.MAIL_USER,
+        pass: config.MAIL_PASSWORD
     }
 })
 
