@@ -7,7 +7,8 @@ import {
     adminChangePasswordSchema,
     adminLoginSchema,
     adminSignupSchema,
-    adminUpdateSchema
+    adminUpdateSchema,
+    adminCreateCompany
 } from '../validator/admin.validator'
 import { z } from 'zod'
 import httpResponse from '../utils/httpResponse'
@@ -20,6 +21,8 @@ import { generateTokens } from '../utils/tokens/tokens'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { companyUpdateSchema } from '../validator/company.validator'
 import logger from '../utils/logger'
+import generateShortId from '../utils/uIds'
+import sendVerificationMail from '../services/emails/verification'
 // import config from '../configs/config'
 const prisma = new PrismaClient()
 
@@ -132,7 +135,14 @@ export const adminLogin = async (req: Request, res: Response, next: NextFunction
 }
 export const adminLogout = (req: Request, res: Response, next: NextFunction): void => {
     try {
-        res.status(501).json({ message: 'Admin logout not implemented' })
+        res.clearCookie('refreshToken', {
+            httpOnly: true, // Important: must match cookie options from setting
+            // secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict', // Important: must match cookie options from setting
+            path: '/' // If your cookie had a path set, include it here
+        })
+
+        return httpResponse(req, res, 200, apiMessages.success.loggedOut, { data: [] })
     } catch (error) {
         if (error instanceof z.ZodError) {
             return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
@@ -262,11 +272,48 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
 // Company Management
 
 /** Create a new company. */
-export const createCompany = (_: Request, res: Response, next: NextFunction) => {
+export const createCompany = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        res.status(501).json({ message: 'Create company not implemented' })
+        const { fullName, email, phone, password, industry, username, description, plan, maxEmployees } = await adminCreateCompany.parseAsync(
+            req.body
+        )
+
+        // Check if comapny already exists
+        const company = await prisma.admin.findUnique({
+            where: { email }
+        })
+
+        if (company) {
+            return httpResponse(req, res, 400, apiMessages.auth.emailAlreadyInUse)
+        }
+
+        const hashedPassword = await hashPassword(password)
+        const compId = generateShortId()
+
+        const newCompany = await prisma.company.create({
+            data: {
+                fullName,
+                email,
+                phone,
+                companyId: compId,
+                password: hashedPassword,
+                industry,
+                username,
+                description,
+                plan,
+                maxEmployees
+            }
+        })
+
+        return httpResponse(req, res, 201, apiMessages.company.companyCreated, { data: newCompany })
     } catch (error) {
-        next(error)
+        // Handle validation errors
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, 'Validation Error', { errors: error.errors })
+        }
+
+        // Handle other errors using httpError
+        return httpError(next, error, req, 500)
     }
 }
 
