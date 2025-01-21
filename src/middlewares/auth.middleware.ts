@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { verifyAccessToken } from '../utils/tokens/tokens'
+import { generateTokens, verifyAccessToken, verifyRefreshToken } from '../utils/tokens/tokens'
 import logger from '../utils/logger'
 import { UserPayload } from '../types/tokens.type'
 import apiMessages from '../constants/apiMessages'
@@ -12,34 +12,74 @@ declare module 'express-serve-static-core' {
 }
 
 export const protect = (req: Request, res: Response, next: NextFunction) => {
-    let token
+    let accessToken
+    let refreshToken
 
-    // Check if the Authorization header exists and starts with "Bearer "
+    // 1. Check for Access Token in Authorization header
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-        try {
-            // Extract the token (remove "Bearer ")
-            token = req.headers.authorization.split(' ')[1]
+        accessToken = req.headers.authorization.split(' ')[1]
+    }
 
-            // Verify the token
-            const decoded = verifyAccessToken(token)
+    // 2. Check for Refresh Token in cookies
+    if (req.cookies && req.cookies.refreshToken) {
+        refreshToken = req.cookies.refreshToken
+    }
 
-            if (decoded) {
-                // Type guard and type assertion
-                if (typeof decoded === 'object' && 'id' in decoded && 'role' in decoded && 'accountType' in decoded) {
-                    req.user = decoded as UserPayload
-                    return next()
-                } else {
-                    logger.error('Invalid token payload structure:', decoded) // Log the incorrect payload
-                    return res.status(401).json({ message: apiMessages.auth.invalidTokenFormat })
-                }
-            } else {
-                return res.status(401).json({ message: apiMessages.auth.invalidToken })
+    // 3. If no tokens are present, return unauthorized
+    if (!accessToken && !refreshToken) {
+        return res.status(401).json({ message: apiMessages.auth.unauthenticated })
+    }
+
+    try {
+        if (accessToken) {
+            // 4a. Verify Access Token
+            const decoded = verifyAccessToken(accessToken)
+            if (decoded && typeof decoded === 'object' && 'id' in decoded && 'role' in decoded && 'accountType' in decoded) {
+                req.user = decoded as UserPayload
+                return next() // Access token is valid, proceed
             }
-        } catch (error) {
-            logger.error('JWT Verification Error:', error) // Log the error on the server
-            return res.status(401).json({ message: apiMessages.auth.invalidToken }) // Return a 401 even if there is an error during verification
         }
-    } else {
+
+        if (refreshToken) {
+            // 4b. Verify Refresh Token
+            const decodedRefreshToken = verifyRefreshToken(refreshToken)
+
+            if (
+                decodedRefreshToken &&
+                typeof decodedRefreshToken === 'object' &&
+                'id' in decodedRefreshToken &&
+                'role' in decodedRefreshToken &&
+                'accountType' in decodedRefreshToken
+            ) {
+                //Generate new tokens
+                const newTokens = generateTokens({
+                    id: decodedRefreshToken.id,
+                    role: decodedRefreshToken.role,
+                    accountType: decodedRefreshToken.accountType
+                })
+
+                // Set new Access Token in Authorization header
+                res.setHeader('Authorization', `Bearer ${newTokens.accessToken}`)
+
+                // Set new Refresh Token in httpOnly cookie
+                res.cookie('refreshToken', newTokens.refreshToken, {
+                    httpOnly: true,
+                    // secure: config.ENV === 'production',
+                    sameSite: 'strict', // recommended for security
+                    path: '/',
+                    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds (or from env)
+                })
+
+                req.user = decodedRefreshToken as UserPayload
+                return next() // Refresh token valid, proceed
+            } else {
+                res.clearCookie('refreshToken')
+                return res.status(401).json({ message: apiMessages.auth.tokenExpired })
+            }
+        }
+        return res.status(401).json({ message: apiMessages.auth.unauthenticated })
+    } catch (error) {
+        logger.error('JWT Verification Error:', error)
         return res.status(401).json({ message: apiMessages.auth.invalidToken })
     }
 }
