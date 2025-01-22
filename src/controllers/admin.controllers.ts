@@ -18,9 +18,10 @@ import comparePassword from '../utils/password/comparePassword'
 import { UserPayload } from '../types/tokens.type'
 import { generateTokens } from '../utils/tokens/tokens'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import { companyUpdateSchema } from '../validator/company.validator'
+import { companyEmployeeUpdateSchema, companyUpdateSchema } from '../validator/company.validator'
 import logger from '../utils/logger'
 import generateShortId from '../utils/uIds'
+import { employeeSignupSchema } from '../validator/employee.validator'
 // import config from '../configs/config'
 const prisma = new PrismaClient()
 
@@ -519,11 +520,34 @@ export const getCompanyEmployeeById = async (req: Request, res: Response, next: 
 // Employee Management (Independent)
 
 /** Create a new employee. */
-export const createEmployee = async (_: Request, res: Response, next: NextFunction) => {
+export const createEmployee = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        res.status(501).json({ message: 'Create employee not implemented' })
+        const { companyId } = req.params
+        const employeeData = await employeeSignupSchema.parseAsync(req.body)
+
+        // Check if the company exists
+        const company = await prisma.company.findUnique({ where: { id: companyId } })
+        if (!company) {
+            return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
+        }
+
+        // Hash the password
+        const hashedPassword = await hashPassword(employeeData.password)
+
+        // Create the employee
+        const employee = await prisma.employee.create({
+            data: {
+                ...employeeData,
+                password: hashedPassword,
+                companyId: company.id
+            }
+        })
+
+        return httpResponse(req, res, 202, apiMessages.employee.employeeCreated, {
+            data: employee
+        })
     } catch (error) {
-        next(error)
+        return httpError(next, error, req, 500)
     }
 }
 
@@ -574,11 +598,30 @@ export const getEmployeeById = async (req: Request, res: Response, next: NextFun
 }
 
 /** Update an employee. */
-export const updateEmployee = async (_: Request, res: Response, next: NextFunction) => {
+export const updateEmployee = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        res.status(501).json({ message: 'Update employee not implemented' })
+        const { employeeId } = req.params
+        const employeeData = await companyEmployeeUpdateSchema.parseAsync(req.body)
+        const employee = await prisma.employee.findUnique({
+            where: {
+                id: employeeId
+            }
+        })
+
+        if (!employee) {
+            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound, { data: [] })
+        }
+
+        await prisma.employee.update({
+            where: {
+                id: employee.id
+            },
+            data: employeeData
+        })
+
+        return httpResponse(req, res, 200, apiMessages.success.updated)
     } catch (error) {
-        next(error)
+        return httpError(next, error, req, 500)
     }
 }
 
