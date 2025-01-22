@@ -3,6 +3,7 @@ import helmet from 'helmet'
 import cors from 'cors'
 import rateLimit from 'express-rate-limit'
 import compression from 'compression'
+import hpp from 'hpp'
 import router from './routes/api.routes'
 import globalErrorHandler from './middlewares/globalErrorHandler'
 import responseMessage from './constants/responseMessage'
@@ -17,12 +18,46 @@ import individualRouter from './routes/individual.routes'
 const app: Application = express()
 
 // Middleware
-// Compress responses for all routes
 app.use(compression())
 app.use(cookieParser())
+
+// Security Middleware
 app.use(helmet())
+
+// Cross-Site Scripting (XSS) by controlling where resources can be loaded from
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", 'data:'],
+            connectSrc: ["'self'"],
+            fontSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: []
+        }
+    })
+)
+
+// XSS (Cross-Site Scripting) Protection
+app.use(helmet.xssFilter()) // Enable XSS protection filter
+
+// HSTS ensures browsers only communicate with your server over HTTPS
+app.use(
+    helmet.hsts({
+        maxAge: 31536000, // 1 year
+        includeSubDomains: true, // Include subdomains
+        preload: true // Optional: for preloading HSTS with browsers
+    })
+)
+
+// Setting a strict referrer policy can prevent leaking sensitive information in the Referer header to other domains
+app.use(helmet.referrerPolicy({ policy: 'strict-origin-when-cross-origin' }))
+
+app.disable('x-powered-by')
 app.use(cors())
-app.use(express.json()) // Parse JSON data with limit
+app.use(express.json({ limit: '25kb' })) // Parse JSON data with limit
 app.use(express.urlencoded({ extended: true, limit: '25kb' })) // Parse URL-encoded data with limit
 
 // Rate Limiting Configuration (Replace with your desired settings)
@@ -34,6 +69,9 @@ const rateLimiter = rateLimit({
         message: 'Too many requests from this IP, please try again later.'
     }
 })
+
+// Protect against HPP, should come before any routes
+app.use(hpp())
 
 // Apply rate limiting to all routes
 app.use(rateLimiter)

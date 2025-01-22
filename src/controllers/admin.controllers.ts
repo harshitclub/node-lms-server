@@ -422,12 +422,26 @@ export const changeCompanyStatus = async (req: Request, res: Response, next: Nex
             return httpResponse(req, res, 400, apiMessages.error.invalidInput)
         }
         const { status } = await adminChangeStatus.parseAsync(req.body)
-        await prisma.company.update({
+        const updatedCompany = await prisma.company.update({
             where: { id: companyId },
             data: { status: status }
         })
+        if (!updatedCompany) {
+            return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
+        }
 
-        return httpResponse(req, res, 200, apiMessages.auth.blocked)
+        let responseMessage: string
+
+        if (updatedCompany.status === 'BLOCKED') {
+            responseMessage = apiMessages.company.companyBlock // Assignment (=), not comparison (===)
+        } else if (updatedCompany.status === 'ACTIVE') {
+            responseMessage = apiMessages.company.companyActive // Assignment (=)
+        } else if (updatedCompany.status === 'INACTIVE') {
+            responseMessage = apiMessages.company.companyInactive // Assignment (=)
+        } else {
+            responseMessage = apiMessages.company.companyUpdated // Default message
+        }
+        return httpResponse(req, res, 200, responseMessage)
     } catch (error) {
         return httpError(next, error, req, 500)
     }
