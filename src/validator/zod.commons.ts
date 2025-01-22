@@ -73,5 +73,8 @@ export const zodSchemas = {
     dateOfBirth: z.date(),
     gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
     jobTitle: z.string(),
-    status: z.enum(['ACTIVE', 'BLOCKED', 'INACTIVE'])
+    status: z.enum(['ACTIVE', 'BLOCKED', 'INACTIVE']),
+    company: z.string().max(80),
+    institute: z.string().max(80),
+    course: z.string().max(80)
 }

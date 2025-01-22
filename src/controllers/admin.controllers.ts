@@ -3,7 +3,6 @@ import { Request, Response, NextFunction } from 'express'
 import {
     adminChangeCompanyPlan,
     adminChangeStatus,
-    // adminChangeCompanyPlan,
     adminChangePasswordSchema,
     adminLoginSchema,
     adminSignupSchema,
@@ -143,9 +142,6 @@ export const adminLogout = (req: Request, res: Response, next: NextFunction): vo
 
         return httpResponse(req, res, 200, apiMessages.success.loggedOut, { data: [] })
     } catch (error) {
-        if (error instanceof z.ZodError) {
-            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
-        }
         // Handle other errors using httpError
         return httpError(next, error, req, 500)
     }

@@ -2,7 +2,7 @@ import express, { Application, NextFunction, Request, Response } from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
 import rateLimit from 'express-rate-limit'
-// import compression from 'compression'
+import compression from 'compression'
 import router from './routes/api.routes'
 import globalErrorHandler from './middlewares/globalErrorHandler'
 import responseMessage from './constants/responseMessage'
@@ -11,13 +11,14 @@ import adminRouter from './routes/admin.routes'
 import companyRouter from './routes/company.routes'
 import employeeRouter from './routes/emplyee.routes'
 import cookieParser from 'cookie-parser'
+import individualRouter from './routes/individual.routes'
 // use npm i npm-check-updates -g
 // to check updates by - "ncu" command
 const app: Application = express()
 
 // Middleware
 // Compress responses for all routes
-// app.use(compression())
+app.use(compression())
 app.use(cookieParser())
 app.use(helmet())
 app.use(cors())
@@ -42,6 +43,7 @@ app.use('/api/v1', router) //testing router
 app.use('/api/v1/admin', adminRouter) // admin router
 app.use('/api/v1/company', companyRouter) // company router
 app.use('/api/v1/employee', employeeRouter) // employee router
+app.use('/api/v1/individual', individualRouter) // individual router
 
 // 404 Handler
 app.use((req: Request, _: Response, next: NextFunction) => {
@@ -55,3 +57,59 @@ app.use((req: Request, _: Response, next: NextFunction) => {
 app.use(globalErrorHandler)
 
 export default app
+
+/*
+[] Rate Limiting
+[] Helmet js
+[] Error Handling
+[] Logging
+[] Don't Expose Stack Traces in Production
+[] Database Connection Pooling
+[] Caching
+[] Gzip Compression
+[] Process Manager (PM2)
+[] Monitoring (Prometheus, Grafana, etc)
+
+
+*****************************
+Production Backend Checklist:
+*****************************
+I. Security:
+[x] HTTPS: Enforce HTTPS on all connections.
+[x] Input Validation: Use Zod or a similar library to validate all user inputs.
+[x] Output Encoding: Encode output to prevent XSS vulnerabilities.
+[x] Security Headers: Implement Helmet.js or manually set security headers (CSP, HSTS, X-Frame-Options, etc.).
+[x] Rate Limiting: Implement rate limiting to prevent brute-force attacks.
+[x] Authentication and Authorization: Use JWTs for authentication and RBAC for authorization.
+[x] Password Hashing: Use bcrypt or Argon2 for password hashing.
+[x] Regular Security Audits: Conduct regular security assessments.
+[x] Dependency Updates: Keep all dependencies up-to-date.
+[x] Secrets Management: Store sensitive information (API keys, database passwords) in environment variables or a secrets management service.
+------------------------------
+II. Performance and Scalability:
+[x] Caching: Implement caching using Redis or a similar solution.
+[x] Database Optimization: Optimize database queries and use indexes.
+[x] Connection Pooling: Use connection pooling for database connections (Prisma handles this).
+[x] Load Balancing: Use a load balancer if needed.
+[x] Gzip Compression: Enable Gzip compression for responses.
+[x] Content Delivery Network (CDN): Use a CDN for static assets (images, videos).
+------------------------------
+III. Error Handling and Logging:
+[x] Centralized Error Handling: Implement a centralized error handling middleware.
+[x] Logging: Use a logging library (Winston, Pino) to log errors and important events.
+[x] Error Monitoring: Set up error monitoring to be notified of errors in production.
+[x] Don't Expose Stack Traces: Avoid sending detailed error information to clients in production.
+------------------------------
+IV. Deployment and Infrastructure:
+[x] Process Manager: Use PM2 or a similar process manager.
+[x] Monitoring: Set up monitoring of server resources (CPU, memory, disk usage).
+[x] Automated Deployments: Use CI/CD for automated deployments.
+[x] Backups: Implement regular database backups.
+[x] Infrastructure as Code (IaC): Use IaC tools (Terraform, CloudFormation) to manage your infrastructure.
+------------------------------
+V. API Design and Documentation:
+[x] RESTful API: Follow RESTful API principles.
+[x] API Versioning: Implement API versioning.
+[x] API Documentation: Document your API using OpenAPI (Swagger).
+[x] Rate Limiting Documentation: Document rate limits.
+*/

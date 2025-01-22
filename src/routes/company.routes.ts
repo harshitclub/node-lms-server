@@ -5,9 +5,6 @@ import {
     getEmployeeById,
     updateEmployee,
     deleteEmployee,
-    blockEmployee,
-    activateEmployee,
-    deactivateEmployee,
     sendInvitation,
     verifyInvitation,
     companySignup,
@@ -15,7 +12,8 @@ import {
     companyLogout,
     getCompanyProfile,
     updateCompanyProfile,
-    changePassword
+    changePassword,
+    changeEmployeeStatus
 } from '../controllers/company.controllers'
 import { protect, protectCompany } from '../middlewares/auth.middleware'
 
@@ -45,9 +43,7 @@ companyRouter
     .patch(updateEmployee) // Update an employee of the company
     .delete(deleteEmployee) // Delete an employee of the company
 
-companyRouter.patch('/employees/:employeeId/block', blockEmployee) // Block an employee of the company
-companyRouter.patch('/employees/:employeeId/activate', activateEmployee) // Activate an employee of the company
-companyRouter.patch('/employees/:employeeId/deactivate', deactivateEmployee) // Deactivate an employee of the company
+companyRouter.patch('/employees/:employeeId/change-status', changeEmployeeStatus) // Change Employee Status
 
 // Invitations (For inviting new employees)
 companyRouter.post('/invitations', sendInvitation) // Send an invitation to a new employee

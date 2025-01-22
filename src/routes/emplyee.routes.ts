@@ -1,16 +1,16 @@
 import { Router } from 'express'
-import { employeeLogin, getMe, updateMe } from '../controllers/employee.controllers'
+import { employeeLogin, employeeLogout, employeeProfile, employeeUpdate } from '../controllers/employee.controllers'
+import { protect, protectEmployee } from '../middlewares/auth.middleware'
 
 const employeeRouter = Router()
 
 // Authentication Route (No auth middleware here)
 employeeRouter.post('/login', employeeLogin)
-
+employeeRouter.get('/logout', employeeLogout)
 // Protected Routes (Require employee authentication)
-// employeeRouter.use(isEmployee);
+employeeRouter.use(protect, protectEmployee)
 
 // Self Routes
-employeeRouter.get('/me', getMe)
-employeeRouter.patch('/me', updateMe)
+employeeRouter.route('/me').get(employeeProfile).patch(employeeUpdate)
 
 export default employeeRouter

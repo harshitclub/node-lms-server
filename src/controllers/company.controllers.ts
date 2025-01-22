@@ -1,6 +1,13 @@
 import { PrismaClient } from '@prisma/client'
 import { Request, Response, NextFunction } from 'express'
-import { companyChangePasswordSchema, companyLoginSchema, companySignupSchema, companyUpdateSchema } from '../validator/company.validator'
+import {
+    companyChangePasswordSchema,
+    companyChangeStatus,
+    companyEmployeeUpdateSchema,
+    companyLoginSchema,
+    companySignupSchema,
+    companyUpdateSchema
+} from '../validator/company.validator'
 import apiMessages from '../constants/apiMessages'
 import httpResponse from '../utils/httpResponse'
 import { hashPassword } from '../utils/password/hashPassword'
@@ -284,13 +291,15 @@ export const createEmployee = async (req: Request, res: Response, next: NextFunc
             return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
         }
 
+        const hashedPassword = await hashPassword(password)
+
         const employee = await prisma.employee.create({
             data: {
                 fullName,
                 email,
                 empId,
                 phone,
-                password,
+                password: hashedPassword,
                 department,
                 dateOfBirth,
                 gender,
@@ -358,11 +367,37 @@ export const getEmployeeById = async (req: Request, res: Response, next: NextFun
     }
 }
 
-export const updateEmployee = (_: Request, res: Response, next: NextFunction): void => {
+export const updateEmployee = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        res.status(501).json({ message: 'Update employee not implemented' })
+        if (!req.user) {
+            res.status(401).json({ message: apiMessages.error.unauthorized }) // Use clear unauthorized message
+        }
+        const { employeeId } = req.params
+        const { id } = req.user as UserPayload
+
+        const employeeData = await companyEmployeeUpdateSchema.parseAsync(req.body)
+
+        const employee = await prisma.employee.findUnique({
+            where: {
+                id: employeeId,
+                companyId: id
+            }
+        })
+        if (!employee) {
+            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound, { data: [] })
+        }
+
+        await prisma.employee.update({
+            where: {
+                id: employee.id,
+                companyId: id
+            },
+            data: employeeData
+        })
+
+        return httpResponse(req, res, 200, apiMessages.success.updated)
     } catch (error) {
-        next(error)
+        return httpError(next, error, req, 500)
     }
 }
 
@@ -374,27 +409,23 @@ export const deleteEmployee = (_: Request, res: Response, next: NextFunction): v
     }
 }
 
-export const blockEmployee = (_: Request, res: Response, next: NextFunction): void => {
+export const changeEmployeeStatus = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        res.status(501).json({ message: 'Block employee not implemented' })
-    } catch (error) {
-        next(error)
-    }
-}
+        const { employeeId } = req.params
 
-export const activateEmployee = (_: Request, res: Response, next: NextFunction): void => {
-    try {
-        res.status(501).json({ message: 'Activate employee not implemented' })
-    } catch (error) {
-        next(error)
-    }
-}
+        if (!employeeId) {
+            return httpResponse(req, res, 400, apiMessages.error.invalidInput)
+        }
+        const { status } = await companyChangeStatus.parseAsync(req.body)
 
-export const deactivateEmployee = (_: Request, res: Response, next: NextFunction): void => {
-    try {
-        res.status(501).json({ message: 'Deactivate employee not implemented' })
+        await prisma.employee.update({
+            where: { id: employeeId },
+            data: { status: status }
+        })
+
+        return httpResponse(req, res, 200, apiMessages.auth.blocked)
     } catch (error) {
-        next(error)
+        return httpError(next, error, req, 500)
     }
 }
 

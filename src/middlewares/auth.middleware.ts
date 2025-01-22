@@ -4,6 +4,11 @@ import logger from '../utils/logger'
 import { UserPayload } from '../types/tokens.type'
 import apiMessages from '../constants/apiMessages'
 
+/*
+
+Building middlewares for specific tasks [[[[[[[[[[]]]]]]]]]]
+
+*/
 // Extend Request interface to include tokenValue property
 declare module 'express-serve-static-core' {
     interface Request {
@@ -103,6 +108,19 @@ export const protectCompany = (req: Request, res: Response, next: NextFunction) 
             return next(err)
         }
         if (req.user && req.user.role === 'COMPANY') {
+            next()
+        } else {
+            return res.status(403).json({ message: apiMessages.error.unauthorized })
+        }
+    })
+}
+
+export const protectEmployee = (req: Request, res: Response, next: NextFunction) => {
+    protect(req, res, (err) => {
+        if (err) {
+            return next(err)
+        }
+        if (req.user && req.user.role === 'EMPLOYEE') {
             next()
         } else {
             return res.status(403).json({ message: apiMessages.error.unauthorized })
