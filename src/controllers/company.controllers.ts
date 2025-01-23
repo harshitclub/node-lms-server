@@ -401,11 +401,29 @@ export const updateEmployee = async (req: Request, res: Response, next: NextFunc
     }
 }
 
-export const deleteEmployee = (_: Request, res: Response, next: NextFunction): void => {
+export const deleteEmployee = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        res.status(501).json({ message: 'Delete employee not implemented' })
+        if (!req.user) {
+            res.status(401).json({ message: apiMessages.error.unauthorized }) // Use clear unauthorized message
+        }
+        const { employeeId } = req.params
+
+        if (!employeeId) {
+            return httpResponse(req, res, 400, apiMessages.error.invalidInput)
+        }
+
+        const { id } = req.user as UserPayload
+
+        await prisma.employee.delete({
+            where: {
+                id: employeeId,
+                companyId: id
+            }
+        })
+
+        return httpResponse(req, res, 200, apiMessages.employee.employeeDeleted)
     } catch (error) {
-        next(error)
+        return httpError(next, error, req, 500)
     }
 }
 

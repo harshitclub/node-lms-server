@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { employeeLogin, employeeLogout, employeeProfile, employeeUpdate } from '../controllers/employee.controllers'
+import { employeeChangePassword, employeeLogin, employeeLogout, employeeProfile, employeeUpdate } from '../controllers/employee.controllers'
 import { protect, protectEmployee } from '../middlewares/auth.middleware'
 
 const employeeRouter = Router()
@@ -12,5 +12,10 @@ employeeRouter.use(protect, protectEmployee)
 
 // Self Routes
 employeeRouter.route('/me').get(employeeProfile).patch(employeeUpdate)
+employeeRouter.patch('/change-password', employeeChangePassword)
+employeeRouter.patch('/verify-account')
+employeeRouter.patch('/verify/:token')
+employeeRouter.patch('/forget-password')
+employeeRouter.patch('/reset-password/:token')
 
 export default employeeRouter

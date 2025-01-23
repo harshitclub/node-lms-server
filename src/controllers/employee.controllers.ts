@@ -1,6 +1,6 @@
 // employee.controllers.ts
 import { Request, Response, NextFunction } from 'express'
-import { employeeLoginSchema, employeeUpdateSchema } from '../validator/employee.validator'
+import { employeeChangePasswordSchema, employeeLoginSchema, employeeUpdateSchema } from '../validator/employee.validator'
 import httpResponse from '../utils/httpResponse'
 import { PrismaClient } from '@prisma/client'
 import apiMessages from '../constants/apiMessages'
@@ -8,6 +8,7 @@ import comparePassword from '../utils/password/comparePassword'
 import { UserPayload } from '../types/tokens.type'
 import { generateTokens } from '../utils/tokens/tokens'
 import httpError from '../utils/httpError'
+import { hashPassword } from '../utils/password/hashPassword'
 const prisma = new PrismaClient()
 
 // Controller for employee login
@@ -120,6 +121,44 @@ export const employeeUpdate = async (req: Request, res: Response, next: NextFunc
         })
 
         return httpResponse(req, res, 200, apiMessages.success.updated, updatedEmployee)
+    } catch (error) {
+        return httpError(next, error, req, 500)
+    }
+}
+
+export const employeeChangePassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        // Ensure user object exists on request (check for authentication middleware)
+        if (!req.user) {
+            res.status(401).json({ message: apiMessages.error.unauthorized }) // Use clear unauthorized message
+        }
+        const { id } = req.user as UserPayload // Destructure user ID for clarity
+        const { oldPassword, newPassword } = await employeeChangePasswordSchema.parseAsync(req.body)
+
+        const employee = await prisma.employee.findUnique({
+            where: { id }
+        })
+
+        if (!employee) {
+            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound)
+        }
+
+        // check password
+        const isPasswordCorrect = await comparePassword(oldPassword, employee.password)
+
+        if (!isPasswordCorrect) {
+            return httpResponse(req, res, 401, apiMessages.auth.wrongCredentials)
+        }
+
+        const hashedPassword = await hashPassword(newPassword)
+
+        await prisma.employee.updateMany({
+            where: {
+                id: employee.id
+            },
+            data: { password: hashedPassword }
+        })
+        return httpResponse(req, res, 200, apiMessages.success.passwordChanged)
     } catch (error) {
         return httpError(next, error, req, 500)
     }

@@ -7,13 +7,15 @@ import apiMessages from '../constants/apiMessages'
 import comparePassword from '../utils/password/comparePassword'
 import {
     individualChangePasswordSchema,
+    individualEmailSchema,
     individualLoginSchema,
     individualSignupSchema,
     individualUpdateSchema
 } from '../validator/individual.validator'
 import { z } from 'zod'
 import { UserPayload } from '../types/tokens.type'
-import { generateTokens } from '../utils/tokens/tokens'
+import { generateTokens, generateVerificationToken } from '../utils/tokens/tokens'
+import verificationCodeMail from '../services/emails/general/verificationCode'
 
 const prisma = new PrismaClient()
 
@@ -221,6 +223,66 @@ export const individualChangePassword = async (req: Request, res: Response, next
         })
 
         return httpResponse(req, res, 200, apiMessages.success.passwordChanged)
+    } catch (error) {
+        return httpError(next, error, req, 500)
+    }
+}
+
+export const sendIndividualVerificationMail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email } = await individualEmailSchema.parseAsync(req.body)
+
+        if (!email) {
+            return httpResponse(req, res, 400, apiMessages.error.invalidInput)
+        }
+
+        const user = await prisma.individual.findUnique({
+            where: { email }
+        })
+
+        if (!user) {
+            return httpResponse(req, res, 404, apiMessages.user.userNotFound)
+        }
+
+        const payload: UserPayload = {
+            id: user.id,
+            role: user.role,
+            accountType: user.accountType
+        }
+
+        const verificationToken = await generateVerificationToken(payload)
+
+        await prisma.individual.update({
+            where: {
+                id: user.id
+            },
+            data: {
+                verificationToken: verificationToken
+            }
+        })
+        await verificationCodeMail({ email, verificationToken })
+        return httpResponse(req, res, 200, apiMessages.success.verificationSent)
+    } catch (error) {
+        return httpError(next, error, req, 500)
+    }
+}
+
+export const verifyIndividualAccount = async (req: Request, _: Response, next: NextFunction) => {
+    try {
+    } catch (error) {
+        return httpError(next, error, req, 500)
+    }
+}
+
+export const sendIndividualResetPasswordMail = async (req: Request, _: Response, next: NextFunction) => {
+    try {
+    } catch (error) {
+        return httpError(next, error, req, 500)
+    }
+}
+
+export const resetIndividualPassword = async (req: Request, _: Response, next: NextFunction) => {
+    try {
     } catch (error) {
         return httpError(next, error, req, 500)
     }

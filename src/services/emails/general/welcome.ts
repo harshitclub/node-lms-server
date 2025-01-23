@@ -1,10 +1,14 @@
-const emailVerificationHtml = `
+import { convert } from 'html-to-text'
+import transporter from '../emailTransporter'
+import logger from '../../../utils/logger'
+
+const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Verification | LMS</title>
+    <title>Welcome to LMS - [name]</title>
     <style>
         body {
             font-family: sans-serif;
@@ -82,17 +86,59 @@ const emailVerificationHtml = `
     </style>
 </head>
 <body>
-    <div class="email-container">
-<!--         <img src="https://via.placeholder.com/40" alt="Company Logo"> -->
-      <h1>LMS</h1>
-        <h2>Confirm your account</h1>
-        <p>Please click the button below to confirm your email address and finish setting up your account. This link is valid for 48 hours.</p>
-        <a href="#" class="button">Confirm</a>
-        <div class="footer">
-            <p>LMS &nbsp;| <a href="#">3alearningsolutions.com</a></p>
-        </div>
-    </div>
-</body>
-</html>`
+  <div class="email-container">
+    <h1>LMS</h1>
+    <h2>Welcome to LMS, [User Name]!</h2>
 
-export default emailVerificationHtml
+    <p>
+      Thank you for verifying your email address and completing your LMS account setup.
+      We're excited to have you on board!
+    </p>
+
+    <p>
+      LMS offers a wide range of courses to help you learn and grow in your field.
+      Explore our course catalog, find topics that interest you, and start learning
+      at your own pace.
+    </p>
+
+    <p>Here are some helpful resources to get you started:</p>
+
+    <ul>
+      <li><a href="#">Browse Courses</a></li>
+      <li><a href="#">Search for Specific Topics</a></li>
+      <li><a href="#">Learn About LMS Features</a></li>
+    </ul>
+
+    <p>
+      We're here to support you on your learning journey. If you have any questions,
+      don't hesitate to contact our support team at <a href="mailto:support@lms.com">support@lms.com</a>.
+    </p>
+
+    <div class="footer">
+      <p>
+        LMS &nbsp;| <a href="#">3alearningsolutions.com</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
+`
+
+const welcomeMail = async () => {
+    try {
+        const mailOptions = {
+            from: `"3a LMS" noreply@amandaschmutzler.com" `,
+            to: `harshitclub@gmail.com`,
+            subject: `Welcome to LMS - [name]`,
+            text: convert(html),
+            html: html
+        }
+
+        const mailResponse = await transporter.sendMail(mailOptions)
+        logger.info(`Email sent successfully. Message ID: ${mailResponse.messageId}`)
+    } catch (error) {
+        logger.error(`Error while welcome mail:`, error)
+    }
+}
+
+export default welcomeMail

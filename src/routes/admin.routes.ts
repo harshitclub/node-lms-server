@@ -1,4 +1,4 @@
-// Admin Routes (Recommended Structure)
+// Admin Routes
 
 import { Router } from 'express'
 import {
@@ -31,61 +31,70 @@ import {
 } from '../controllers/admin.controllers'
 import { protect, protectAdmin } from '../middlewares/auth.middleware'
 
+// Initialize the router
 const adminRouter = Router()
 
-adminRouter.post('/signup', adminSignup)
-adminRouter.post('/login', adminLogin)
-adminRouter.post('/logout', adminLogout)
+// Authentication Routes (No Middleware Applied)
+adminRouter.post('/signup', adminSignup) // Admin signup
+adminRouter.post('/login', adminLogin) // Admin login
+adminRouter.post('/logout', adminLogout) // Admin logout
 
-// Apply admin authentication middleware to all routes *after* authentication routes
+// Apply authentication and admin protection middleware to all routes below
 adminRouter.use(protect, protectAdmin)
 
-// Admin Self Routes (Protected by isAdmin middleware)
-adminRouter.get('/me', getMe)
-adminRouter.patch('/me', updateMe)
-adminRouter.patch('/me/change-password', changePassword)
+// Admin Self Management Routes
+adminRouter.get('/me', getMe) // Get admin's own details
+adminRouter.patch('/me', updateMe) // Update admin's own profile
+adminRouter.patch('/me/change-password', changePassword) // Change admin's password
+adminRouter.patch('/verify-account')
+adminRouter.patch('/verify/:token')
+adminRouter.patch('/forget-password')
+adminRouter.patch('/reset-password/:token')
 
-// Company Management
+// Company Management Routes
 adminRouter
     .route('/companies')
     .post(createCompany) // Create a new company
-    .get(getCompanies) // Get all companies (or with filters/pagination)
+    .get(getCompanies) // Get all companies with optional filters and pagination
 
 adminRouter
     .route('/companies/:companyId')
-    .get(getCompanyById) // Get a specific company by ID
-    .patch(updateCompany) // Update a company
+    .get(getCompanyById) // Retrieve a company by its ID
+    .patch(updateCompany) // Update company details
     .delete(deleteCompany) // Delete a company
 
-adminRouter.patch('/companies/:companyId/change-plan', changeCompanyPlan)
-adminRouter.patch('/companies/:companyId/change-status', changeCompanyStatus) // Block a company
+adminRouter.patch('/companies/:companyId/change-plan', changeCompanyPlan) // Change company plan
+adminRouter.patch('/companies/:companyId/change-status', changeCompanyStatus) // Block or unblock a company
 
+// Company Employee Management Routes
 adminRouter
     .route('/companies/:companyId/employees')
-    .get(getCompanyEmployees) // Get employees of a company
-    .post(createEmployee)
-adminRouter.get('/companies/:companyId/employees/:employeeId', getCompanyEmployeeById) // Get a specific employee of a company
+    .get(getCompanyEmployees) // Get all employees of a specific company
+    .post(createEmployee) // Add a new employee to a company
 
-// Employee Management (Independent of Companies)
-adminRouter.route('/employees').get(getEmployees) // Get all employees
+adminRouter.get('/companies/:companyId/employees/:employeeId', getCompanyEmployeeById) // Get details of a specific employee in a company
+
+// Global Employee Management Routes
+adminRouter.route('/employees').get(getEmployees) // Get all employees (independent of company)
 
 adminRouter
     .route('/employees/:employeeId')
-    .get(getEmployeeById) // Get a specific employee
-    .patch(updateEmployee) // Update an employee
+    .get(getEmployeeById) // Retrieve an employee's details by ID
+    .patch(updateEmployee) // Update employee details
     .delete(deleteEmployee) // Delete an employee
 
-adminRouter.patch('/employees/:employeeId/change-status', changeEmployeeStatus) // Change status of employee
+adminRouter.patch('/employees/:employeeId/change-status', changeEmployeeStatus) // Change employee status (e.g., active/inactive)
 
-// Individual Management
-adminRouter.route('/individuals').get(getIndividuals) // Get all individuals
+// Individual User Management Routes
+adminRouter.route('/individuals').get(getIndividuals) // Get all individual users
 
 adminRouter
     .route('/individuals/:individualId')
-    .get(getIndividualById) // Get a specific individual
-    .patch(updateIndividual) // Update an individual
-    .delete(deleteIndividual) // Delete an individual
+    .get(getIndividualById) // Retrieve details of a specific individual
+    .patch(updateIndividual) // Update individual details
+    .delete(deleteIndividual) // Delete an individual user
 
-adminRouter.patch('/individuals/:individualId/change-status', changeIndividualStatus) // Block an individual
+adminRouter.patch('/individuals/:individualId/change-status', changeIndividualStatus) // Block or unblock an individual user
 
+// Export the configured router for use in the application
 export default adminRouter
