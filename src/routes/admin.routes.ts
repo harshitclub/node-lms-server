@@ -38,6 +38,10 @@ const adminRouter = Router()
 adminRouter.post('/signup', adminSignup) // Admin signup
 adminRouter.post('/login', adminLogin) // Admin login
 adminRouter.post('/logout', adminLogout) // Admin logout
+adminRouter.patch('/verify-account')
+adminRouter.patch('/verify/:token')
+adminRouter.patch('/forget-password')
+adminRouter.patch('/reset-password/:token')
 
 // Apply authentication and admin protection middleware to all routes below
 adminRouter.use(protect, protectAdmin)
@@ -46,10 +50,6 @@ adminRouter.use(protect, protectAdmin)
 adminRouter.get('/me', getMe) // Get admin's own details
 adminRouter.patch('/me', updateMe) // Update admin's own profile
 adminRouter.patch('/me/change-password', changePassword) // Change admin's password
-adminRouter.patch('/verify-account')
-adminRouter.patch('/verify/:token')
-adminRouter.patch('/forget-password')
-adminRouter.patch('/reset-password/:token')
 
 // Company Management Routes
 adminRouter

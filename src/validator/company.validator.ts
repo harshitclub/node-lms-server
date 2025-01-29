@@ -42,3 +42,11 @@ export const companyEmployeeUpdateSchema = z.object({
 export const companyChangeStatus = z.object({
     status: zodSchemas.status
 })
+
+export const companyEmailSchema = z.object({
+    email: zodSchemas.emailSchema
+})
+
+export const companyPasswordSchema = z.object({
+    password: zodSchemas.passwordSchema
+})

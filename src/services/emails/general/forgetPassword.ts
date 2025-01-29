@@ -2,7 +2,8 @@ import { convert } from 'html-to-text'
 import transporter from '../emailTransporter'
 import logger from '../../../utils/logger'
 
-const html = `
+const forgetPasswordMail = async ({ forgetPassToken, email }: { forgetPassToken: string; email: string }) => {
+    const html = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -100,7 +101,7 @@ const html = `
       expire in 48 hours for security reasons.
     </p>
 
-    <a href="#" class="button">Reset Your Password</a>
+    <a href="http://localhost:2001/verify/${forgetPassToken}" target="_blank" class="button">Reset Your Password</a>
 
     <div class="footer">
       <p>
@@ -111,12 +112,10 @@ const html = `
 </body>
 </html>
 `
-
-const forgetPasswordMail = async () => {
     try {
         const mailOptions = {
             from: `"3a LMS" noreply@amandaschmutzler.com" `,
-            to: `harshitclub@gmail.com`,
+            to: email,
             subject: `Reset Password - LMS`,
             text: convert(html),
             html: html

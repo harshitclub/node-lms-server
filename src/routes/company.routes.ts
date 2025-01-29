@@ -13,7 +13,11 @@ import {
     getCompanyProfile,
     updateCompanyProfile,
     changePassword,
-    changeEmployeeStatus
+    changeEmployeeStatus,
+    sendCompanyVerificationMail,
+    verifyCompanyAccount,
+    sendCompanyResetPasswordMail,
+    resetCompanyPassword
 } from '../controllers/company.controllers'
 import { protect, protectCompany } from '../middlewares/auth.middleware'
 
@@ -23,6 +27,10 @@ const companyRouter = Router()
 companyRouter.post('/signup', companySignup)
 companyRouter.post('/login', companyLogin)
 companyRouter.post('/logout', companyLogout) // Protect logout
+companyRouter.patch('/verify-account', sendCompanyVerificationMail)
+companyRouter.patch('/verify/:token', verifyCompanyAccount)
+companyRouter.patch('/forget-password', sendCompanyResetPasswordMail)
+companyRouter.patch('/reset-password/:token', resetCompanyPassword)
 
 companyRouter.use(protect, protectCompany)
 
@@ -30,10 +38,6 @@ companyRouter.use(protect, protectCompany)
 companyRouter.get('/me', getCompanyProfile)
 companyRouter.patch('/me', updateCompanyProfile)
 companyRouter.patch('/me/change-password', changePassword)
-companyRouter.patch('/verify-account')
-companyRouter.patch('/verify/:token')
-companyRouter.patch('/forget-password')
-companyRouter.patch('/reset-password/:token')
 
 // Company Employee Management
 companyRouter
