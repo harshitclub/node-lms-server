@@ -14,7 +14,7 @@ import {
 } from '../validator/individual.validator'
 import { z } from 'zod'
 import { UserPayload } from '../types/tokens.type'
-import { generateTokens, generateVerificationToken } from '../utils/tokens/tokens'
+import { generateTokens, generateVerificationToken, verifyVerificationToken } from '../utils/tokens/tokens'
 import verificationCodeMail from '../services/emails/general/verificationCode'
 
 const prisma = new PrismaClient()
@@ -267,8 +267,29 @@ export const sendIndividualVerificationMail = async (req: Request, res: Response
     }
 }
 
-export const verifyIndividualAccount = async (req: Request, _: Response, next: NextFunction) => {
+export const verifyIndividualAccount = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const { token } = req.params
+
+        if (!token) {
+            return httpResponse(req, res, 404, apiMessages.auth.noTokenProvided)
+        }
+
+        const decoded = verifyVerificationToken(token) as UserPayload
+        if (!decoded) {
+            return httpResponse(req, res, 400, apiMessages.auth.invalidToken)
+        }
+
+        await prisma.individual.update({
+            where: {
+                id: decoded.id
+            },
+            data: {
+                isVerified: true
+            }
+        })
+
+        return httpResponse(req, res, 200, apiMessages.success.accountVerified)
     } catch (error) {
         return httpError(next, error, req, 500)
     }
