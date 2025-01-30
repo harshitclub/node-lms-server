@@ -29,6 +29,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { employeeSignupSchema } from '../validator/employee.validator'
 import verificationCodeMail from '../services/emails/general/verificationCode'
 import forgetPasswordMail from '../services/emails/general/forgetPassword'
+import sendInvitationMail from '../services/emails/company/sendInvitation'
 const prisma = new PrismaClient()
 
 // Company Authentication Controllers
@@ -319,6 +320,8 @@ export const createEmployee = async (req: Request, res: Response, next: NextFunc
             }
         })
 
+        await sendInvitationMail({ fullName, email, password })
+
         return httpResponse(req, res, 201, apiMessages.employee.employeeCreated, employee)
     } catch (error) {
         // Handle validation errors
@@ -416,13 +419,12 @@ export const deleteEmployee = async (req: Request, res: Response, next: NextFunc
         if (!req.user) {
             res.status(401).json({ message: apiMessages.error.unauthorized }) // Use clear unauthorized message
         }
+        const { id } = req.user as UserPayload
         const { employeeId } = req.params
 
         if (!employeeId) {
             return httpResponse(req, res, 400, apiMessages.error.invalidInput)
         }
-
-        const { id } = req.user as UserPayload
 
         await prisma.employee.delete({
             where: {
@@ -610,22 +612,5 @@ export const resetCompanyPassword = async (req: Request, res: Response, next: Ne
         return httpResponse(req, res, 200, apiMessages.success.passwordChanged)
     } catch (error) {
         return httpError(next, error, req, 500)
-    }
-}
-
-// Invitations
-export const sendInvitation = (_: Request, res: Response, next: NextFunction): void => {
-    try {
-        res.status(501).json({ message: 'Send invitation not implemented' })
-    } catch (error) {
-        next(error)
-    }
-}
-
-export const verifyInvitation = (_: Request, res: Response, next: NextFunction): void => {
-    try {
-        res.status(501).json({ message: 'Verify invitation not implemented' })
-    } catch (error) {
-        next(error)
     }
 }

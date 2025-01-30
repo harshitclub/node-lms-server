@@ -1,5 +1,13 @@
 import { Router } from 'express'
-import { employeeChangePassword, employeeLogin, employeeLogout, employeeProfile, employeeUpdate } from '../controllers/employee.controllers'
+import {
+    employeeChangePassword,
+    employeeLogin,
+    employeeLogout,
+    employeeProfile,
+    employeeUpdate,
+    resetEmployeePassword,
+    sendEmployeeResetPasswordMail
+} from '../controllers/employee.controllers'
 import { protect, protectEmployee } from '../middlewares/auth.middleware'
 
 const employeeRouter = Router()
@@ -9,8 +17,8 @@ employeeRouter.post('/login', employeeLogin)
 employeeRouter.get('/logout', employeeLogout)
 employeeRouter.patch('/verify-account')
 employeeRouter.patch('/verify/:token')
-employeeRouter.patch('/forget-password')
-employeeRouter.patch('/reset-password/:token')
+employeeRouter.patch('/forget-password', sendEmployeeResetPasswordMail)
+employeeRouter.patch('/reset-password/:token', resetEmployeePassword)
 // Protected Routes (Require employee authentication)
 employeeRouter.use(protect, protectEmployee)
 

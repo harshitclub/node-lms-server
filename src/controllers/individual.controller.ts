@@ -14,8 +14,16 @@ import {
 } from '../validator/individual.validator'
 import { z } from 'zod'
 import { UserPayload } from '../types/tokens.type'
-import { generateTokens, generateVerificationToken, verifyVerificationToken } from '../utils/tokens/tokens'
+import {
+    generateForgetPasswordToken,
+    generateTokens,
+    generateVerificationToken,
+    verifyForgetPasswordToken,
+    verifyVerificationToken
+} from '../utils/tokens/tokens'
 import verificationCodeMail from '../services/emails/general/verificationCode'
+import forgetPasswordMail from '../services/emails/general/forgetPassword'
+import { employeePasswordSchema } from '../validator/employee.validator'
 
 const prisma = new PrismaClient()
 
@@ -295,15 +303,74 @@ export const verifyIndividualAccount = async (req: Request, res: Response, next:
     }
 }
 
-export const sendIndividualResetPasswordMail = async (req: Request, _: Response, next: NextFunction) => {
+export const sendIndividualResetPasswordMail = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const { email } = await individualEmailSchema.parseAsync(req.body)
+
+        if (!email) {
+            return httpResponse(req, res, 400, apiMessages.error.invalidInput)
+        }
+
+        const user = await prisma.individual.findUnique({
+            where: { email }
+        })
+
+        if (!user) {
+            return httpResponse(req, res, 404, apiMessages.user.userNotFound)
+        }
+
+        const payload: UserPayload = {
+            id: user.id,
+            role: user.role,
+            accountType: user.accountType
+        }
+
+        const forgetPassToken = generateForgetPasswordToken(payload)
+
+        await prisma.individual.update({
+            where: { id: user.id },
+            data: { forgetPasswordToken: forgetPassToken }
+        })
+
+        await forgetPasswordMail({ email, forgetPassToken })
+
+        return httpResponse(req, res, 200, apiMessages.success.forgetPasswordSent)
     } catch (error) {
         return httpError(next, error, req, 500)
     }
 }
 
-export const resetIndividualPassword = async (req: Request, _: Response, next: NextFunction) => {
+export const resetIndividualPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const { token } = req.params
+        const { password } = await employeePasswordSchema.parseAsync(req.body)
+
+        if (!token) {
+            return httpResponse(req, res, 404, apiMessages.auth.noTokenProvided)
+        }
+        const decoded = verifyForgetPasswordToken(token) as UserPayload
+        if (!decoded) {
+            return httpResponse(req, res, 400, apiMessages.auth.invalidToken)
+        }
+
+        const user = await prisma.individual.findUnique({
+            where: { id: decoded.id }
+        })
+
+        if (!user) {
+            return httpResponse(req, res, 404, apiMessages.user.userNotFound)
+        }
+
+        const hashedPassword = await hashPassword(password)
+
+        await prisma.individual.updateMany({
+            where: { id: decoded.id },
+            data: {
+                password: hashedPassword
+            }
+        })
+
+        return httpResponse(req, res, 200, apiMessages.success.passwordChanged)
     } catch (error) {
         return httpError(next, error, req, 500)
     }
