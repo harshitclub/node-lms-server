@@ -23,6 +23,7 @@ import { companyEmployeeUpdateSchema, companyUpdateSchema } from '../validator/c
 import logger from '../utils/logger'
 import generateShortId from '../utils/uIds'
 import { employeeSignupSchema } from '../validator/employee.validator'
+import sendInvitationMail from '../services/emails/company/sendInvitation'
 // import config from '../configs/config'
 const prisma = new PrismaClient()
 
@@ -301,6 +302,8 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
                 maxEmployees
             }
         })
+
+        await sendInvitationMail({ fullName, email, password })
 
         return httpResponse(req, res, 201, apiMessages.company.companyCreated, { data: newCompany })
     } catch (error) {
