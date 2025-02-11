@@ -116,6 +116,7 @@ model Company {
 
   // Relationships
   employees       Employee[]      @relation("CompanyEmployees")
+  courses         Course[]        @relation("CompanyCourses")
   contactPerson   CompanyContact? @relation("CompanyContactPerson") // Make optional
   contactPersonId String?         @unique // Add foreign key - Important and make it unique
 }
@@ -217,6 +218,9 @@ model Course {
   whoIsThisCourseFor String? // Intended audience (text description)
   published          Boolean? @default(true) // Is the course published?
 
+  company   Company @relation("CompanyCourses", fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+
   videos      Video[] // Relation to Video model (one-to-many)
   assessments Assessment[] // Relation to Assessment model (one-to-many)
   createdAt   DateTime     @default(now())
@@ -236,7 +240,7 @@ model Video {
   description     String?
   order           Int? // Add an order field for sorting videos within a chapter/course
   isPublished     Boolean?    @default(true) // Add a field to track if the video is published
-  course          Course      @relation(fields: [courseId], references: [id]) // Foreign key
+  course          Course      @relation(fields: [courseId], references: [id], onDelete: Cascade) // Foreign key
   courseId        String
   videoAssessment Assessment? @relation("video_assessment") // One-to-one relation to video-specific assessment
   createdAt       DateTime    @default(now())
@@ -249,9 +253,9 @@ model Assessment {
   id        String   @id @default(uuid())
   title     String // Title of the assessment
   questions Json[] // Store assessment questions as JSON (required)
-  course    Course   @relation(fields: [courseId], references: [id]) // Foreign key
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade) // Foreign key
   courseId  String
-  video     Video?   @relation("video_assessment", fields: [videoId], references: [id]) // back relation from video to its assessment
+  video     Video?   @relation("video_assessment", fields: [videoId], references: [id], onDelete: Cascade) // back relation from video to its assessment
   videoId   String?  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
