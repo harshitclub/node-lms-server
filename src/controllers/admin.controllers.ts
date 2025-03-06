@@ -52,7 +52,7 @@ export const adminSignup = async (req: Request, res: Response, next: NextFunctio
         })
 
         // Structure the response data
-        const adminData = {
+        const userData = {
             id: newAdmin.id,
             fullName: newAdmin.fullName,
             email: newAdmin.email,
@@ -62,14 +62,22 @@ export const adminSignup = async (req: Request, res: Response, next: NextFunctio
         }
 
         // Use httpResponse for consistent success responses
-        return httpResponse(req, res, 201, apiMessages.admin.adminCreated, adminData)
+        return httpResponse(req, res, 201, apiMessages.admin.adminCreated, { user: userData })
     } catch (error) {
-        // Handle validation errors
         if (error instanceof z.ZodError) {
             return httpResponse(req, res, 400, 'Validation Error', { errors: error.errors })
         }
 
-        // Handle other errors using httpError
+        if (error instanceof PrismaClientKnownRequestError) {
+            if (error.code === 'P2002') {
+                // Unique constraint violation (e.g., email already exists)
+                return httpResponse(req, res, 400, apiMessages.auth.emailAlreadyInUse)
+            }
+            logger.error(`Prisma error during admin signup: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during admin signup: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -110,27 +118,31 @@ export const adminLogin = async (req: Request, res: Response, next: NextFunction
             maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds (or from env)
         })
 
-        return httpResponse(req, res, 200, apiMessages.success.loggedIn, {
-            admin: {
-                id: admin.id,
-                fullName: admin.fullName,
-                email: admin.email,
-                phone: admin.phone,
-                address: admin.address,
-                accountType: admin.accountType,
-                role: admin.role,
-                status: admin.status,
-                isVerified: admin.isVerified,
-                userAgent: admin.userAgent,
-                createdAt: admin.createdAt,
-                token: accessToken
-            }
-        })
+        const userData = {
+            id: admin.id,
+            fullName: admin.fullName,
+            email: admin.email,
+            phone: admin.phone,
+            accountType: admin.accountType,
+            role: admin.role,
+            status: admin.status,
+            isVerified: admin.isVerified,
+            createdAt: admin.createdAt,
+            token: accessToken
+        }
+
+        return httpResponse(req, res, 200, apiMessages.success.loggedIn, { user: userData })
     } catch (error) {
         if (error instanceof z.ZodError) {
             return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
         }
-        // Handle other errors using httpError
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during admin login: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during admin login: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -151,7 +163,7 @@ export const adminLogout = (req: Request, res: Response, next: NextFunction): vo
 }
 
 // Admin Self Routes (Profile Management)
-export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const adminProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         // Ensure user object exists on request (check for authentication middleware)
         if (!req.user) {
@@ -161,7 +173,7 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
         const { id } = req.user as UserPayload // Destructure user ID for clarity
 
         // Perform efficient user retrieval with type safety using `findUniqueOrThrow`
-        const user = await prisma.admin.findUnique({
+        const userData = await prisma.admin.findUnique({
             where: { id },
             select: {
                 fullName: true,
@@ -177,29 +189,26 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
             } // Explicitly select only the required field
         })
 
-        return httpResponse(req, res, 200, apiMessages.success.fetched, user)
+        if (!userData) {
+            return httpResponse(req, res, 404, apiMessages.admin.adminNotFound)
+        }
+
+        return httpResponse(req, res, 200, apiMessages.success.fetched, { user: userData })
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
-            // Handle known Prisma errors (e.g., not found)
             if (error.code === 'P2025') {
-                // Handle specific 'not found' error code
-                res.status(404).json({ message: apiMessages.admin.adminNotFound }) // Clear "not found" message
-            } else {
-                // Handle other Prisma errors (e.g., database connection issues)
-                console.error('Prisma error:', error)
-                return httpError(next, error, req, 500) // Use existing error handler
+                return httpResponse(req, res, 404, apiMessages.admin.adminNotFound)
             }
-        } else if (error instanceof z.ZodError) {
-            // Handle validation errors with httpResponse
-            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
-        } else {
-            // Handle unexpected errors using httpError
+            logger.error(`Prisma error during getMe: ${error.message}`, error)
             return httpError(next, error, req, 500)
         }
+
+        logger.error(`Error during getMe: ${error}`, error)
+        return httpError(next, error, req, 500)
     }
 }
 
-export const updateMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const updateAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         // Ensure user object exists on request (check for authentication middleware)
         if (!req.user) {
@@ -213,18 +222,26 @@ export const updateMe = async (req: Request, res: Response, next: NextFunction):
             data: adminData
         })
 
-        return httpResponse(req, res, 200, apiMessages.success.updated, updatedAdmin)
+        return httpResponse(req, res, 200, apiMessages.success.updated, { user: updatedAdmin })
     } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            res.status(404).json({ message: apiMessages.admin.adminNotFound }) // Handle not found
-        } else if (error instanceof z.ZodError) {
-            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors }) // Zod validation errors
+        if (error instanceof PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return httpResponse(req, res, 404, apiMessages.admin.adminNotFound)
+            }
+            logger.error(`Prisma error during updateAdmin: ${error.message}`, error)
+            return httpError(next, error, req, 500)
         }
+
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
+        }
+
+        logger.error(`Error during updateAdmin: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
 
-export const changePassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const adminChangePassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
         // Ensure user object exists on request (check for authentication middleware)
         if (!req.user) {
@@ -258,11 +275,19 @@ export const changePassword = async (req: Request, res: Response, next: NextFunc
 
         return httpResponse(req, res, 200, apiMessages.success.passwordChanged)
     } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            res.status(404).json({ message: apiMessages.admin.adminNotFound }) // Handle not found
-        } else if (error instanceof z.ZodError) {
-            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors }) // Zod validation errors
+        if (error instanceof PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return httpResponse(req, res, 404, apiMessages.admin.adminNotFound)
+            }
+            logger.error(`Prisma error during adminChangePassword: ${error.message}`, error)
+            return httpError(next, error, req, 500)
         }
+
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
+        }
+
+        logger.error(`Error during adminChangePassword: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -303,16 +328,28 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
             }
         })
 
-        await sendInvitationMail({ fullName, email, password })
-
-        return httpResponse(req, res, 201, apiMessages.company.companyCreated, { data: newCompany })
-    } catch (error) {
-        // Handle validation errors
-        if (error instanceof z.ZodError) {
-            return httpResponse(req, res, 400, 'Validation Error', { errors: error.errors })
+        try {
+            await sendInvitationMail({ fullName, email, password })
+        } catch (mailError) {
+            logger.error(`Error sending invitation mail: ${mailError}`, mailError)
+            return httpResponse(req, res, 201, apiMessages.company.companyCreated, {
+                user: newCompany,
+                message: 'Company created, but invitation email failed to send.'
+            })
         }
 
-        // Handle other errors using httpError
+        return httpResponse(req, res, 201, apiMessages.company.companyCreated, { user: newCompany })
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
+        }
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during createCompany: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during createCompany: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -338,12 +375,18 @@ export const getCompanies = async (req: Request, res: Response, next: NextFuncti
 
         // Check if companies exist before sending a response
         if (!companies.length) {
-            return httpResponse(req, res, 200, apiMessages.admin.noCompaniesFound, { data: [] })
+            return httpResponse(req, res, 404, apiMessages.admin.noCompaniesFound, { users: [] })
         }
 
-        return httpResponse(req, res, 200, apiMessages.admin.companiesFound, companies)
+        return httpResponse(req, res, 200, apiMessages.admin.companiesFound, { users: companies })
     } catch (error) {
-        return httpError(next, error, req)
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during getCompanies: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during getCompanies: ${error}`, error)
+        return httpError(next, error, req, 500)
     }
 }
 
@@ -378,8 +421,14 @@ export const getCompanyById = async (req: Request, res: Response, next: NextFunc
             httpResponse(req, res, 404, apiMessages.admin.noCompanyFound)
         }
 
-        return httpResponse(req, res, 200, apiMessages.admin.companyFound, company)
+        return httpResponse(req, res, 200, apiMessages.admin.companyFound, { user: company })
     } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during getCompanyById: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during getCompanyById: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -399,11 +448,18 @@ export const updateCompany = async (req: Request, res: Response, next: NextFunct
             data: companyData
         })
 
-        return httpResponse(req, res, 200, apiMessages.success.updated, updatedCompany)
+        return httpResponse(req, res, 200, apiMessages.success.updated, { user: updatedCompany })
     } catch (error) {
         if (error instanceof z.ZodError) {
-            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors }) // Zod validation errors
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
         }
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during updateCompany: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during updateCompany: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -425,6 +481,12 @@ export const deleteCompany = async (req: Request, res: Response, next: NextFunct
         // Send success response
         return httpResponse(req, res, 200, apiMessages.company.companyDeleted)
     } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during deleteCompany: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during deleteCompany: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -459,6 +521,16 @@ export const changeCompanyStatus = async (req: Request, res: Response, next: Nex
         }
         return httpResponse(req, res, 200, responseMessage)
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
+        }
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during changeCompanyStatus: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during changeCompanyStatus: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -483,11 +555,19 @@ export const changeCompanyPlan = async (req: Request, res: Response, next: NextF
 
         return httpResponse(req, res, 200, apiMessages.company.companyPlanChange)
     } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
-        } else if (error instanceof z.ZodError) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
+            }
+            logger.error(`Prisma error during changeCompanyPlan: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        if (error instanceof z.ZodError) {
             return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
         }
+
+        logger.error(`Error during changeCompanyPlan: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -509,11 +589,17 @@ export const getCompanyEmployees = async (req: Request, res: Response, next: Nex
             return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound)
         }
 
-        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, employees)
+        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees })
     } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
+        if (error instanceof PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
+            }
+            logger.error(`Prisma error during getCompanyEmployees: ${error.message}`, error)
+            return httpError(next, error, req, 500)
         }
+
+        logger.error(`Error during getCompanyEmployees: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -538,11 +624,17 @@ export const getCompanyEmployeeById = async (req: Request, res: Response, next: 
             return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound)
         }
 
-        return httpResponse(req, res, 200, apiMessages.employee.employeeFound, employee)
+        return httpResponse(req, res, 200, apiMessages.employee.employeeFound, { user: employee })
     } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
+        if (error instanceof PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return httpResponse(req, res, 404, apiMessages.company.companyNotFound)
+            }
+            logger.error(`Prisma error during getCompanyEmployeeById: ${error.message}`, error)
+            return httpError(next, error, req, 500)
         }
+
+        logger.error(`Error during getCompanyEmployeeById: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -574,9 +666,19 @@ export const createEmployee = async (req: Request, res: Response, next: NextFunc
         })
 
         return httpResponse(req, res, 202, apiMessages.employee.employeeCreated, {
-            data: employee
+            user: employee
         })
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
+        }
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during createEmployee: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during createEmployee: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -588,14 +690,17 @@ export const getEmployees = async (req: Request, res: Response, next: NextFuncti
 
         // Check if employees array is empty, not if it's null/undefined
         if (employees.length === 0) {
-            return httpResponse(req, res, 200, apiMessages.employee.employeesNotFound, { data: [] }) // Return empty array with 200 OK
+            return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound, { users: [] }) // Return empty array with 200 OK
         }
 
-        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { data: employees }) // Return data in object
+        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees }) // Return data in object
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
-            logger.error('Prisma Error in getEmployees:', error)
+            logger.error(`Prisma error during getEmployees: ${error.message}`, error)
+            return httpError(next, error, req, 500)
         }
+
+        logger.error(`Error during getEmployees: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -615,14 +720,20 @@ export const getEmployeeById = async (req: Request, res: Response, next: NextFun
         })
 
         if (!employee) {
-            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound, { data: [] })
+            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound, { user: [] })
         }
 
-        return httpResponse(req, res, 200, apiMessages.employee.employeeFound, { data: employee })
+        return httpResponse(req, res, 200, apiMessages.employee.employeeFound, { user: employee })
     } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound)
+        if (error instanceof PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound)
+            }
+            logger.error(`Prisma error during getEmployeeById: ${error.message}`, error)
+            return httpError(next, error, req, 500)
         }
+
+        logger.error(`Error during getEmployeeById: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -639,18 +750,28 @@ export const updateEmployee = async (req: Request, res: Response, next: NextFunc
         })
 
         if (!employee) {
-            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound, { data: [] })
+            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound, { user: [] })
         }
 
-        await prisma.employee.update({
+        const updatedEmployee = await prisma.employee.update({
             where: {
                 id: employee.id
             },
             data: employeeData
         })
 
-        return httpResponse(req, res, 200, apiMessages.success.updated)
+        return httpResponse(req, res, 200, apiMessages.success.updated, { user: updatedEmployee })
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
+        }
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during updateEmployee: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during updateEmployee: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -667,6 +788,12 @@ export const deleteEmployee = async (req: Request, res: Response, next: NextFunc
         })
         return httpResponse(req, res, 200, apiMessages.employee.employeeDeleted)
     } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during deleteEmployee: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during deleteEmployee: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -705,11 +832,21 @@ export const changeEmployeeStatus = async (req: Request, res: Response, next: Ne
             responseMessage = apiMessages.employee.employeeUpdated // Default message
         }
 
-        return httpResponse(req, res, 200, responseMessage)
+        return httpResponse(req, res, 200, responseMessage, { user: updatedEmployee })
     } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError && error.code === 'P2025') {
-            return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound)
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
         }
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                return httpResponse(req, res, 404, apiMessages.employee.employeeNotFound)
+            }
+            logger.error(`Prisma error during changeEmployeeStatus: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during changeEmployeeStatus: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -722,12 +859,18 @@ export const getIndividuals = async (req: Request, res: Response, next: NextFunc
         const individuals = await prisma.individual.findMany()
 
         // Check if companies exist before sending a response
-        if (!individuals.length) {
-            return httpResponse(req, res, 200, apiMessages.user.usersNotFound, { data: [] })
+        if (individuals.length === 0) {
+            return httpResponse(req, res, 404, apiMessages.user.usersNotFound, { users: [] })
         }
 
-        return httpResponse(req, res, 200, apiMessages.user.usersFound, { data: individuals })
+        return httpResponse(req, res, 200, apiMessages.user.usersFound, { users: individuals })
     } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during getIndividuals: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during getIndividuals: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -742,11 +885,17 @@ export const getIndividualById = async (req: Request, res: Response, next: NextF
         })
 
         if (!individual) {
-            return httpResponse(req, res, 200, apiMessages.user.userNotFound, { data: [] })
+            return httpResponse(req, res, 404, apiMessages.user.userNotFound, { user: [] })
         }
 
-        return httpResponse(req, res, 200, apiMessages.user.userFound, { data: individual })
+        return httpResponse(req, res, 200, apiMessages.user.userFound, { user: individual })
     } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during getIndividualById: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during getIndividualById: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -761,18 +910,28 @@ export const updateIndividual = async (req: Request, res: Response, next: NextFu
         })
 
         if (!individual) {
-            return httpResponse(req, res, 200, apiMessages.user.userNotFound)
+            return httpResponse(req, res, 404, apiMessages.user.userNotFound)
         }
 
-        const userData = await adminIndividualUpdateSchema.parseAsync(req.body)
+        const individualData = await adminIndividualUpdateSchema.parseAsync(req.body)
 
-        await prisma.individual.update({
+        const updatedIndividual = await prisma.individual.update({
             where: { id: individual.id },
-            data: userData
+            data: individualData
         })
 
-        return httpResponse(req, res, 200, apiMessages.success.updated)
+        return httpResponse(req, res, 200, apiMessages.success.updated, { user: updatedIndividual })
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
+        }
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during updateIndividual: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during updateIndividual: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -792,6 +951,12 @@ export const deleteIndividual = async (req: Request, res: Response, next: NextFu
 
         return httpResponse(req, res, 200, apiMessages.user.userDeleted)
     } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during deleteIndividual: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during deleteIndividual: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -805,7 +970,7 @@ export const changeIndividualStatus = async (req: Request, res: Response, next: 
         })
 
         if (!individual) {
-            return httpResponse(req, res, 200, apiMessages.user.userNotFound)
+            return httpResponse(req, res, 404, apiMessages.user.userNotFound)
         }
 
         const { status } = await adminChangeStatus.parseAsync(req.body)
@@ -828,8 +993,18 @@ export const changeIndividualStatus = async (req: Request, res: Response, next: 
             responseMessage = apiMessages.employee.employeeUpdated // Default message
         }
 
-        return httpResponse(req, res, 200, responseMessage)
+        return httpResponse(req, res, 200, responseMessage, { user: updatedIndividual })
     } catch (error) {
+        if (error instanceof z.ZodError) {
+            return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
+        }
+
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during changeIndividualStatus: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+
+        logger.error(`Error during changeIndividualStatus: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }

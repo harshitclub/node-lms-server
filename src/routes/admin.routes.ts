@@ -9,7 +9,7 @@ import {
     changeCompanyStatus,
     changeEmployeeStatus,
     changeIndividualStatus,
-    changePassword,
+    adminChangePassword,
     createCompany,
     createEmployee,
     deleteCompany,
@@ -23,11 +23,11 @@ import {
     getEmployees,
     getIndividualById,
     getIndividuals,
-    getMe,
+    adminProfile,
     updateCompany,
     updateEmployee,
     updateIndividual,
-    updateMe
+    updateAdmin
 } from '../controllers/admin.controllers'
 import { protect, protectAdmin } from '../middlewares/auth.middleware'
 
@@ -47,9 +47,9 @@ adminRouter.patch('/reset-password/:token')
 adminRouter.use(protect, protectAdmin)
 
 // Admin Self Management Routes
-adminRouter.get('/me', getMe) // Get admin's own details
-adminRouter.patch('/me', updateMe) // Update admin's own profile
-adminRouter.patch('/me/change-password', changePassword) // Change admin's password
+adminRouter.get('/me', adminProfile) // Get admin's own details
+adminRouter.patch('/me', updateAdmin) // Update admin's own profile
+adminRouter.patch('/me/change-password', adminChangePassword) // Change admin's password
 
 // Company Management Routes
 adminRouter
