@@ -13,6 +13,7 @@ import companyRouter from './routes/company.routes'
 import employeeRouter from './routes/emplyee.routes'
 import cookieParser from 'cookie-parser'
 import individualRouter from './routes/individual.routes'
+import authRouter from './routes/auth.routes'
 // use npm i npm-check-updates -g
 // to check updates by - "ncu" command
 const app: Application = express()
@@ -78,6 +79,7 @@ app.use(rateLimiter)
 
 // Routes
 app.use('/api/v1', router) //testing router
+app.use('/api/v1/auth', authRouter)
 app.use('/api/v1/admin', adminRouter) // admin router
 app.use('/api/v1/company', companyRouter) // company router
 app.use('/api/v1/employee', employeeRouter) // employee router
