@@ -94,7 +94,8 @@ export const protectAdmin = (req: Request, res: Response, next: NextFunction) =>
         if (err) {
             return next(err)
         }
-        if (req.user && req.user.role === 'ADMIN') {
+        if (req.user && req.user.role === 'admin') {
+            console.log(req.user)
             next()
         } else {
             return res.status(403).json({ message: apiMessages.error.unauthorized })

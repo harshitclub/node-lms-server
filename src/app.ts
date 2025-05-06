@@ -3,7 +3,7 @@ import helmet from 'helmet'
 import cors from 'cors'
 import rateLimit from 'express-rate-limit'
 import compression from 'compression'
-import hpp from 'hpp'
+// import hpp from 'hpp'
 import router from './routes/api.routes'
 import globalErrorHandler from './middlewares/globalErrorHandler'
 import responseMessage from './constants/responseMessage'
@@ -26,38 +26,55 @@ app.use(cookieParser())
 app.use(helmet())
 
 // Cross-Site Scripting (XSS) by controlling where resources can be loaded from
-app.use(
-    helmet.contentSecurityPolicy({
-        directives: {
-            defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
-            imgSrc: ["'self'", 'data:'],
-            connectSrc: ["'self'"],
-            fontSrc: ["'self'"],
-            objectSrc: ["'none'"],
-            upgradeInsecureRequests: []
-        }
-    })
-)
+// app.use(
+//     helmet.contentSecurityPolicy({
+//         directives: {
+//             defaultSrc: ["'self'"],
+//             scriptSrc: ["'self'", "'unsafe-inline'"],
+//             styleSrc: ["'self'", "'unsafe-inline'"],
+//             imgSrc: ["'self'", 'data:'],
+//             connectSrc: ["'self'"],
+//             fontSrc: ["'self'"],
+//             objectSrc: ["'none'"],
+//             upgradeInsecureRequests: []
+//         }
+//     })
+// )
 
 // XSS (Cross-Site Scripting) Protection
-app.use(helmet.xssFilter()) // Enable XSS protection filter
+// app.use(helmet.xssFilter()) // Enable XSS protection filter
 
 // HSTS ensures browsers only communicate with your server over HTTPS
-app.use(
-    helmet.hsts({
-        maxAge: 31536000, // 1 year
-        includeSubDomains: true, // Include subdomains
-        preload: true // Optional: for preloading HSTS with browsers
-    })
-)
+// app.use(
+//     helmet.hsts({
+//         maxAge: 31536000, // 1 year
+//         includeSubDomains: true, // Include subdomains
+//         preload: true // Optional: for preloading HSTS with browsers
+//     })
+// )
 
 // Setting a strict referrer policy can prevent leaking sensitive information in the Referer header to other domains
-app.use(helmet.referrerPolicy({ policy: 'strict-origin-when-cross-origin' }))
+// app.use(helmet.referrerPolicy({ policy: 'strict-origin-when-cross-origin' }))
 
-app.disable('x-powered-by')
-app.use(cors())
+// app.disable('x-powered-by')
+// setting up allowed routes
+const allowedOrigins: string[] = ['http://localhost:5173']
+
+app.use(
+    cors({
+        origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true)
+            } else {
+                callback(new Error('Not allowed by CORS'))
+            }
+        },
+        credentials: true,
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
+        maxAge: 86400
+    })
+)
 app.use(express.json({ limit: '25kb' })) // Parse JSON data with limit
 app.use(express.urlencoded({ extended: true, limit: '25kb' })) // Parse URL-encoded data with limit
 
@@ -72,7 +89,7 @@ const rateLimiter = rateLimit({
 })
 
 // Protect against HPP, should come before any routes
-app.use(hpp())
+// app.use(hpp())
 
 // Apply rate limiting to all routes
 app.use(rateLimiter)
