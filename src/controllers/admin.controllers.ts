@@ -20,7 +20,7 @@ import { UserPayload } from '../types/tokens.type'
 import { generateTokens } from '../utils/tokens/tokens'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 import { companyEmployeeUpdateSchema, companyUpdateSchema } from '../validator/company.validator'
-import logger from '../utils/logger'
+import { logger } from '../utils/logger'
 import generateShortId from '../utils/uIds'
 import { employeeSignupSchema } from '../validator/employee.validator'
 import sendInvitationMail from '../services/emails/company/sendInvitation'
@@ -134,6 +134,7 @@ export const adminLogin = async (req: Request, res: Response, next: NextFunction
         return httpResponse(req, res, 200, apiMessages.success.loggedIn, { user: userData })
     } catch (error) {
         if (error instanceof z.ZodError) {
+            logger.warn(`Validation error during admin login: ${error.errors}`)
             return httpResponse(req, res, 400, apiMessages.error.validationError, { errors: error.errors })
         }
 

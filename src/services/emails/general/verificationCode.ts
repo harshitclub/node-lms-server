@@ -1,4 +1,4 @@
-import logger from '../../../utils/logger'
+import { logger } from '../../../utils/logger'
 import transporter from '../emailTransporter'
 
 import { convert } from 'html-to-text'

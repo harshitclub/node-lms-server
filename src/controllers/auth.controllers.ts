@@ -8,7 +8,7 @@ import apiMessages from '../constants/apiMessages'
 import comparePassword from '../utils/password/comparePassword'
 import { z } from 'zod'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import logger from '../utils/logger'
+import { logger } from '../utils/logger'
 import httpError from '../utils/httpError'
 
 const prisma = new PrismaClient()

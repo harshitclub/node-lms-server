@@ -1,6 +1,6 @@
 import { convert } from 'html-to-text'
 import transporter from '../emailTransporter'
-import logger from '../../../utils/logger'
+import { logger } from '../../../utils/logger'
 
 const forgetPasswordMail = async ({ forgetPassToken, email }: { forgetPassToken: string; email: string }) => {
     const html = `

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { generateTokens, verifyAccessToken, verifyRefreshToken } from '../utils/tokens/tokens'
-import logger from '../utils/logger'
+import { logger } from '../utils/logger'
 import { UserPayload } from '../types/tokens.type'
 import apiMessages from '../constants/apiMessages'
 

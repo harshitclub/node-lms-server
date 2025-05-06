@@ -2,7 +2,7 @@ import { NextFunction, Request } from 'express'
 import config from '../configs/config'
 import { EApplicationEnvironment } from '../constants/application'
 import responseMessage from '../constants/responseMessage'
-import logger from './logger'
+import { logger } from './logger'
 
 /**
  * HTTP error handler

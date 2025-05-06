@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import config from '../configs/config'
 import { EApplicationEnvironment } from '../constants/application'
-import logger from './logger'
+import { logger } from './logger'
 
 /**
  * HTTP response handler
