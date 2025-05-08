@@ -37,13 +37,7 @@ app.disable('x-powered-by')
 const allowedOrigins: string[] = ['http://localhost:5173']
 app.use(
     cors({
-        origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true)
-            } else {
-                callback(new Error('Not allowed by CORS'))
-            }
-        },
+        origin: allowedOrigins, // Directly use the array
         credentials: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept', 'X-Requested-With'],
@@ -98,7 +92,11 @@ app.use((req: Request, _: Response, next: NextFunction) => {
 app.use(globalErrorHandler)
 
 // Start the server
-app.listen({ port, host: '0.0.0.0', reusePort: true }, () => {
+// app.listen({ port, host: '0.0.0.0', reusePort: true }, () => {
+//     logger.info(`Server started on port ${port} in ${environment} mode`)
+// })
+
+app.listen(port, () => {
     logger.info(`Server started on port ${port} in ${environment} mode`)
 })
 

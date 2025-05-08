@@ -27,7 +27,10 @@ import {
     updateCompany,
     updateEmployee,
     updateIndividual,
-    updateAdmin
+    updateAdmin,
+    getTotalCompaniesNumber,
+    getTotalEmployeesNumber,
+    getTotalIndividualsNumber
 } from '../controllers/admin.controllers'
 import { protect, protectAdmin } from '../middlewares/auth.middleware'
 
@@ -95,6 +98,11 @@ adminRouter
     .delete(deleteIndividual) // Delete an individual user
 
 adminRouter.patch('/individuals/:individualId/change-status', changeIndividualStatus) // Block or unblock an individual user
+
+// Light API's
+adminRouter.route('/total-companies-number').get(getTotalCompaniesNumber)
+adminRouter.route('/total-employees-number').get(getTotalEmployeesNumber)
+adminRouter.route('/total-individual-number').get(getTotalIndividualsNumber)
 
 // Export the configured router for use in the application
 export default adminRouter

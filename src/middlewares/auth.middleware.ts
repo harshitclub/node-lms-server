@@ -95,7 +95,6 @@ export const protectAdmin = (req: Request, res: Response, next: NextFunction) =>
             return next(err)
         }
         if (req.user && req.user.role === 'admin') {
-            console.log(req.user)
             next()
         } else {
             return res.status(403).json({ message: apiMessages.error.unauthorized })
@@ -108,7 +107,7 @@ export const protectCompany = (req: Request, res: Response, next: NextFunction) 
         if (err) {
             return next(err)
         }
-        if (req.user && req.user.role === 'COMPANY') {
+        if (req.user && req.user.role === 'company') {
             next()
         } else {
             return res.status(403).json({ message: apiMessages.error.unauthorized })
@@ -121,7 +120,7 @@ export const protectEmployee = (req: Request, res: Response, next: NextFunction)
         if (err) {
             return next(err)
         }
-        if (req.user && req.user.role === 'EMPLOYEE') {
+        if (req.user && req.user.role === 'employee') {
             next()
         } else {
             return res.status(403).json({ message: apiMessages.error.unauthorized })

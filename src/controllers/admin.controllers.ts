@@ -24,6 +24,7 @@ import { logger } from '../utils/logger'
 import generateShortId from '../utils/uIds'
 import { employeeSignupSchema } from '../validator/employee.validator'
 import sendInvitationMail from '../services/emails/company/sendInvitation'
+import responseMessage from '../constants/responseMessage'
 // import config from '../configs/config'
 const prisma = new PrismaClient()
 
@@ -358,28 +359,45 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
 /** Get all companies (with optional filters/pagination). */
 export const getCompanies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const companies = await prisma.company.findMany({
-            select: {
-                fullName: true,
-                email: true,
-                phone: true,
-                username: true,
-                companyId: true,
-                plan: true,
-                maxEmployees: true,
-                accountType: true,
-                role: true,
-                status: true,
-                isVerified: true
-            }
-        })
+        const DEFAULT_PAGE_SIZE = 10
+        const page = parseInt(req.query.page as string, 10) || 1
+        const pageSize = parseInt(req.query.pageSize as string, 10) || DEFAULT_PAGE_SIZE
+        const skip = (page - 1) * pageSize
+        const [companies, total] = await prisma.$transaction([
+            prisma.company.findMany({
+                select: {
+                    fullName: true,
+                    email: true,
+                    phone: true,
+                    username: true,
+                    companyId: true,
+                    plan: true,
+                    maxEmployees: true,
+                    accountType: true,
+                    role: true,
+                    status: true,
+                    isVerified: true
+                },
+                skip,
+                take: pageSize
+                // orderBy: {
+                //     fullName: 'asc', // Or any other field you want to sort by
+                //   },
+            }),
+            prisma.company.count()
+        ])
 
         // Check if companies exist before sending a response
         if (!companies.length) {
-            return httpResponse(req, res, 404, apiMessages.admin.noCompaniesFound, { users: [] })
+            return httpResponse(req, res, 404, apiMessages.admin.noCompaniesFound, {
+                users: [],
+                total,
+                page,
+                pageSize
+            })
         }
 
-        return httpResponse(req, res, 200, apiMessages.admin.companiesFound, { users: companies })
+        return httpResponse(req, res, 200, apiMessages.admin.companiesFound, { users: companies, total, page, pageSize })
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
             logger.error(`Prisma error during getCompanies: ${error.message}`, error)
@@ -387,6 +405,22 @@ export const getCompanies = async (req: Request, res: Response, next: NextFuncti
         }
 
         logger.error(`Error during getCompanies: ${error}`, error)
+        return httpError(next, error, req, 500)
+    }
+}
+
+/** Get total number of companies. */
+export const getTotalCompaniesNumber = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const totalCompanies = await prisma.company.count()
+        const numberOfCompanies = totalCompanies.toString()
+        return httpResponse(req, res, 200, responseMessage.SUCCESS, { users: numberOfCompanies })
+    } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during getTotalCompaniesNumber: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+        logger.error(`Error during getTotalCompaniesNumber: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -582,15 +616,25 @@ export const getCompanyEmployees = async (req: Request, res: Response, next: Nex
             return httpResponse(req, res, 400, apiMessages.error.invalidInput)
         }
 
-        const employees = await prisma.employee.findMany({
-            where: { companyId: companyId }
-        })
+        const DEFAULT_PAGE_SIZE = 10
+        const page = parseInt(req.query.page as string, 10) || 1
+        const pageSize = parseInt(req.query.pageSize as string, 10) || DEFAULT_PAGE_SIZE
+        const skip = (page - 1) * pageSize
 
-        if (!employees) {
-            return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound)
+        const [employees, total] = await prisma.$transaction([
+            prisma.employee.findMany({
+                where: { companyId: companyId },
+                skip,
+                take: pageSize
+            }),
+            prisma.employee.count()
+        ])
+
+        if (!employees.length) {
+            return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound, { users: [], total, page, pageSize })
         }
 
-        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees })
+        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees, total, page, pageSize })
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
             if (error.code === 'P2025') {
@@ -687,14 +731,24 @@ export const createEmployee = async (req: Request, res: Response, next: NextFunc
 /** Get all employees. */
 export const getEmployees = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const employees = await prisma.employee.findMany()
+        const DEFAULT_PAGE_SIZE = 10
+        const page = parseInt(req.query.page as string, 10) || 1
+        const pageSize = parseInt(req.query.pageSize as string, 10) || DEFAULT_PAGE_SIZE
+        const skip = (page - 1) * pageSize
+        const [employees, total] = await prisma.$transaction([
+            prisma.employee.findMany({
+                skip,
+                take: pageSize
+            }),
+            prisma.employee.count()
+        ])
 
         // Check if employees array is empty, not if it's null/undefined
-        if (employees.length === 0) {
-            return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound, { users: [] }) // Return empty array with 200 OK
+        if (!employees.length) {
+            return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound, { users: [], total, page, pageSize }) // Return empty array with 200 OK
         }
 
-        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees }) // Return data in object
+        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees, total, page, pageSize }) // Return data in object
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
             logger.error(`Prisma error during getEmployees: ${error.message}`, error)
@@ -702,6 +756,22 @@ export const getEmployees = async (req: Request, res: Response, next: NextFuncti
         }
 
         logger.error(`Error during getEmployees: ${error}`, error)
+        return httpError(next, error, req, 500)
+    }
+}
+
+/** Get total number of employees. */
+export const getTotalEmployeesNumber = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const totalEmployees = await prisma.employee.count()
+        const numberOfEmployees = totalEmployees.toString()
+        return httpResponse(req, res, 200, responseMessage.SUCCESS, { users: numberOfEmployees })
+    } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during getTotalEmployeesNumber: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+        logger.error(`Error during getTotalEmployeesNumber: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }
@@ -857,14 +927,24 @@ export const changeEmployeeStatus = async (req: Request, res: Response, next: Ne
 /** Get all individuals. */
 export const getIndividuals = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const individuals = await prisma.individual.findMany()
+        const DEFAULT_PAGE_SIZE = 10
+        const page = parseInt(req.query.page as string, 10) || 1
+        const pageSize = parseInt(req.query.pageSize as string, 10) || DEFAULT_PAGE_SIZE
+        const skip = (page - 1) * pageSize
+        const [individuals, total] = await prisma.$transaction([
+            prisma.individual.findMany({
+                skip,
+                take: pageSize
+            }),
+            prisma.individual.count()
+        ])
 
         // Check if companies exist before sending a response
-        if (individuals.length === 0) {
-            return httpResponse(req, res, 404, apiMessages.user.usersNotFound, { users: [] })
+        if (!individuals.length) {
+            return httpResponse(req, res, 404, apiMessages.user.usersNotFound, { users: [], total, page, pageSize })
         }
 
-        return httpResponse(req, res, 200, apiMessages.user.usersFound, { users: individuals })
+        return httpResponse(req, res, 200, apiMessages.user.usersFound, { users: individuals, total, page, pageSize })
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
             logger.error(`Prisma error during getIndividuals: ${error.message}`, error)
@@ -872,6 +952,22 @@ export const getIndividuals = async (req: Request, res: Response, next: NextFunc
         }
 
         logger.error(`Error during getIndividuals: ${error}`, error)
+        return httpError(next, error, req, 500)
+    }
+}
+
+/** Get total number of individuals. */
+export const getTotalIndividualsNumber = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const totalIndividuals = await prisma.individual.count()
+        const numberOfIndividuals = totalIndividuals.toString()
+        return httpResponse(req, res, 200, responseMessage.SUCCESS, { users: numberOfIndividuals })
+    } catch (error) {
+        if (error instanceof PrismaClientKnownRequestError) {
+            logger.error(`Prisma error during getTotalIndividualsNumber: ${error.message}`, error)
+            return httpError(next, error, req, 500)
+        }
+        logger.error(`Error during getTotalIndividualsNumber: ${error}`, error)
         return httpError(next, error, req, 500)
     }
 }

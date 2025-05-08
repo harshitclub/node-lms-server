@@ -83,7 +83,6 @@ async function handleLoginSuccess(req: Request, res: Response, user: any, role: 
 
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        console.log('Database URL:', process.env.DATABASE_URL)
         const { email, password } = await unifiedLoginSchema.parseAsync(req.body)
         // 1. Admin Check
         let admin = await prisma.admin.findUnique({ where: { email } })

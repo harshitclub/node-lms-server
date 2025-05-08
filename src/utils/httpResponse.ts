@@ -26,7 +26,7 @@ const httpResponse = (req: Request, res: Response, statusCode: number, message: 
     }
 
     // Log the response
-    logger.info('CONTROLLER_RESPONSE', { meta: response })
+    logger.info(`Response sent: Status ${statusCode} - ${message}`, { meta: response })
 
     // Send the response
     res.status(statusCode).json(response)

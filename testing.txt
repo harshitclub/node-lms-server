@@ -1,0 +1,975 @@
+companies:-
+
+[
+  {
+    "fullName": "Acme Innovations Ltd",
+    "email": "info@acmeinnovations.com",
+    "phone": "919876543210",
+    "password": "Harshit@123",
+    "industry": "Technology",
+    "username": "acme_tech",
+    "description": "Innovative tech solutions for a digital world.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Beta Solutions Group",
+    "email": "contact@betasolutions.net",
+    "phone": "918765432109",
+    "password": "Harshit@123",
+    "industry": "Consulting",
+    "username": "beta_consult",
+    "description": "Strategic consulting to optimize business growth.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Gamma Industries Corp",
+    "email": "sales@gammaindustries.org",
+    "phone": "917654321098",
+    "password": "Harshit@123",
+    "industry": "Manufacturing",
+    "username": "gamma_mfg",
+    "description": "High-quality industrial products and manufacturing.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Delta Retail Ventures",
+    "email": "support@deltaretail.co",
+    "phone": "916543210987",
+    "password": "Harshit@123",
+    "industry": "Retail",
+    "username": "delta_retail",
+    "description": "Exceptional customer experiences in retail.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Epsilon Financial Services",
+    "email": "info@epsilonfinance.in",
+    "phone": "915432109876",
+    "password": "Harshit@123",
+    "industry": "Finance",
+    "username": "epsilon_fin",
+    "description": "Comprehensive financial solutions and expert advice.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Zeta Software Solutions",
+    "email": "marketing@zetasoftware.com",
+    "phone": "914321098765",
+    "password": "Harshit@123",
+    "industry": "Technology",
+    "username": "zeta_soft",
+    "description": "Innovative and scalable software development.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Eta Marketing Agency",
+    "email": "hello@etamarketing.net",
+    "phone": "913210987654",
+    "password": "Harshit@123",
+    "industry": "Marketing",
+    "username": "eta_market",
+    "description": "Creative marketing strategies for brand growth.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Theta Healthcare Group",
+    "email": "info@thetahealthcare.org",
+    "phone": "912109876543",
+    "password": "Harshit@123",
+    "industry": "Healthcare",
+    "username": "theta_health",
+    "description": "Quality healthcare services with compassion.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Iota Education Services",
+    "email": "enroll@iotaeducation.co",
+    "phone": "911098765432",
+    "password": "Harshit@123",
+    "industry": "Education",
+    "username": "iota_edu",
+    "description": "Empowering learners through quality education.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Kappa Construction Ltd",
+    "email": "projects@kappaconstruction.in",
+    "phone": "919988776655",
+    "password": "Harshit@123",
+    "industry": "Construction",
+    "username": "kappa_build",
+    "description": "Reliable construction for diverse projects.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Lambda Food Industries",
+    "email": "order@lambdafood.com",
+    "phone": "918877665544",
+    "password": "Harshit@123",
+    "industry": "Food & Beverage",
+    "username": "lambda_food",
+    "description": "High-quality food and beverage products.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Mu Energy Solutions",
+    "email": "info@muenergy.net",
+    "phone": "917766554433",
+    "password": "Harshit@123",
+    "industry": "Energy",
+    "username": "mu_energy",
+    "description": "Sustainable and efficient energy solutions.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Nu Logistics Services",
+    "email": "operations@nulogistics.org",
+    "phone": "916655443322",
+    "password": "Harshit@123",
+    "industry": "Logistics",
+    "username": "nu_logistics",
+    "description": "Efficient transportation and supply chain.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Xi Media Productions",
+    "email": "creative@ximedia.co",
+    "phone": "915544332211",
+    "password": "Harshit@123",
+    "industry": "Media & Entertainment",
+    "username": "xi_media",
+    "description": "Engaging video and multimedia content.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Omicron Travel Agency",
+    "email": "travel@omicrontravel.in",
+    "phone": "914433221100",
+    "password": "Harshit@123",
+    "industry": "Travel & Tourism",
+    "username": "omicron_travel",
+    "description": "Exceptional travel experiences worldwide.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Pi Chemical Industries",
+    "email": "sales@pichemicals.com",
+    "phone": "913322110099",
+    "password": "Harshit@123",
+    "industry": "Chemicals",
+    "username": "pi_chemicals",
+    "description": "Leading manufacturer of industrial chemicals.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Rho Fashion House",
+    "email": "style@rhofashion.net",
+    "phone": "912211009988",
+    "password": "Harshit@123",
+    "industry": "Fashion",
+    "username": "rho_fashion",
+    "description": "Stylish and high-quality apparel designs.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Sigma Technology Group",
+    "email": "info@sigmatech.org",
+    "phone": "911100998877",
+    "password": "Harshit@123",
+    "industry": "Technology",
+    "username": "sigma_tech",
+    "description": "Comprehensive IT services and solutions.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Tau Financial Corp",
+    "email": "contact@taufinance.co",
+    "phone": "919786543211",
+    "password": "Harshit@123",
+    "industry": "Finance",
+    "username": "tau_finance",
+    "description": "Expert financial planning and investment.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Upsilon Marketing Solutions",
+    "email": "engage@upsilonmarketing.in",
+    "phone": "918675432102",
+    "password": "Harshit@123",
+    "industry": "Marketing",
+    "username": "upsilon_market",
+    "description": "Data-driven marketing for measurable results.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Phi Healthcare Services",
+    "email": "care@phihealthcare.com",
+    "phone": "917564321093",
+    "password": "Harshit@123",
+    "industry": "Healthcare",
+    "username": "phi_health",
+    "description": "Patient-centered healthcare with quality.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Chi Education Institute",
+    "email": "learn@chieducation.net",
+    "phone": "916453210984",
+    "password": "Harshit@123",
+    "industry": "Education",
+    "username": "chi_edu",
+    "description": "Fostering intellectual growth and development.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Psi Construction Group",
+    "email": "build@psiconstruction.org",
+    "phone": "915342109875",
+    "password": "Harshit@123",
+    "industry": "Construction",
+    "username": "psi_build",
+    "description": "Quality construction for residential, commercial.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Omega Food Products",
+    "email": "taste@omegafood.co",
+    "phone": "914231098766",
+    "password": "Harshit@123",
+    "industry": "Food & Beverage",
+    "username": "omega_food",
+    "description": "Delicious and nutritious food products.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Alpha Renewable Energy",
+    "email": "green@alphaenergy.in",
+    "phone": "913120987657",
+    "password": "Harshit@123",
+    "industry": "Energy",
+    "username": "alpha_energy",
+    "description": "Sustainable renewable energy solutions.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Bravo Logistics Solutions",
+    "email": "ship@bravologistics.com",
+    "phone": "912019876548",
+    "password": "Harshit@123",
+    "industry": "Logistics",
+    "username": "bravo_logistics",
+    "description": "Reliable logistics and supply chain services.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Charlie Media Group",
+    "email": "connect@charliemedia.net",
+    "phone": "911908765439",
+    "password": "Harshit@123",
+    "industry": "Media & Entertainment",
+    "username": "charlie_media",
+    "description": "Creative media production and engagement.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Echo Travel Services",
+    "email": "explore@echotravel.org",
+    "phone": "919675432120",
+    "password": "Harshit@123",
+    "industry": "Travel & Tourism",
+    "username": "echo_travel",
+    "description": "Personalized and memorable travel experiences.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Foxtrot Chemical Corp",
+    "email": "inquire@foxtrotchem.co",
+    "phone": "918564321011",
+    "password": "Harshit@123",
+    "industry": "Chemicals",
+    "username": "foxtrot_chem",
+    "description": "Supplier of quality chemical products.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Golf Fashion Trends",
+    "email": "style@golffashion.in",
+    "phone": "917453210902",
+    "password": "Harshit@123",
+    "industry": "Fashion",
+    "username": "golf_fashion",
+    "description": "Latest trends in fashion and apparel.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Hotel Tech Solutions",
+    "email": "support@hoteltech.com",
+    "phone": "916342109893",
+    "password": "Harshit@123",
+    "industry": "Technology",
+    "username": "hotel_tech",
+    "description": "Technology solutions for the hospitality.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "India Finance Advisors",
+    "email": "advice@indiafinance.net",
+    "phone": "915231098784",
+    "password": "Harshit@123",
+    "industry": "Finance",
+    "username": "india_finance",
+    "description": "Trusted financial advice and planning.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Juliet Marketing Inc",
+    "email": "results@julietmarketing.org",
+    "phone": "914120987675",
+    "password": "Harshit@123",
+    "industry": "Marketing",
+    "username": "juliet_market",
+    "description": "Effective marketing strategies and campaigns.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Kilo Health Systems",
+    "email": "support@kilohealth.co",
+    "phone": "913019876566",
+    "password": "Harshit@123",
+    "industry": "Healthcare",
+    "username": "kilo_health",
+    "description": "Advanced healthcare services and systems.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Lima Learning Center",
+    "email": "info@limalearning.in",
+    "phone": "912908765457",
+    "password": "Harshit@123",
+    "industry": "Education",
+    "username": "lima_learn",
+    "description": "Quality learning and development programs.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  },
+  {
+    "fullName": "Mike Building Corp",
+    "email": "info@mikebuilding.com",
+    "phone": "911897654348",
+    "password": "Harshit@123",
+    "industry": "Construction",
+    "username": "mike_build",
+    "description": "Expert building and construction services.",
+    "plan": "CUSTOM",
+    "maxEmployees": "5"
+  }
+]
+
+
+employees:-
+[
+  {
+    "fullName": "Piyush Sharma",
+    "email": "piyush.sharma@example.com",
+    "empId": "EMP001",
+    "phone": "919876543210",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Software Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Anjali Verma",
+    "email": "anjali.verma@example.com",
+    "empId": "EMP002",
+    "phone": "918765432109",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "HR Manager",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Rahul Kapoor",
+    "email": "rahul.kapoor@example.com",
+    "empId": "EMP003",
+    "phone": "917654321098",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Accountant",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Sneha Singh",
+    "email": "sneha.singh@example.com",
+    "empId": "EMP004",
+    "phone": "916543210987",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Marketing Specialist",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Amit Patel",
+    "email": "amit.patel@example.com",
+    "empId": "EMP005",
+    "phone": "915432109876",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Operations Manager",
+    "status": "ACTIVE"
+  }
+]
+
+[
+  {
+    "fullName": "Priya Verma",
+    "email": "priya.verma@example.com",
+    "empId": "EMP006",
+    "phone": "918765432111",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Frontend Developer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Aryan Singh",
+    "email": "aryan.singh@example.com",
+    "empId": "EMP007",
+    "phone": "917654321112",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Backend Developer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Neha Gupta",
+    "email": "neha.gupta@example.com",
+    "empId": "EMP008",
+    "phone": "916543211113",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "QA Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Vikram Yadav",
+    "email": "vikram.yadav@example.com",
+    "empId": "EMP009",
+    "phone": "915432111114",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "DevOps Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Kriti Sharma",
+    "email": "kriti.sharma@example.com",
+    "empId": "EMP010",
+    "phone": "914321111115",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Technical Lead",
+    "status": "ACTIVE"
+  }
+]
+[
+  {
+    "fullName": "Rohit Verma",
+    "email": "rohit.verma@example.com",
+    "empId": "EMP011",
+    "phone": "913211111116",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Mobile Developer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Divya Singh",
+    "email": "divya.singh@example.com",
+    "empId": "EMP012",
+    "phone": "912111111117",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Data Scientist",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Manish Kapoor",
+    "email": "manish.kapoor@example.com",
+    "empId": "EMP013",
+    "phone": "911111111118",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "UI/UX Designer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Shweta Patel",
+    "email": "shweta.patel@example.com",
+    "empId": "EMP014",
+    "phone": "919011111119",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Security Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Saurabh Kumar",
+    "email": "saurabh.kumar@example.com",
+    "empId": "EMP015",
+    "phone": "918011111120",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Engineering Manager",
+    "status": "ACTIVE"
+  }
+]
+
+[
+  {
+    "fullName": "Pooja Sharma",
+    "email": "pooja.sharma@example.com",
+    "empId": "EMP016",
+    "phone": "917011111121",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Technical Architect",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Rohan Verma",
+    "email": "rohan.verma@example.com",
+    "empId": "EMP017",
+    "phone": "916011111122",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Cloud Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Simran Singh",
+    "email": "simran.singh@example.com",
+    "empId": "EMP018",
+    "phone": "915011111123",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Database Administrator",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Vivek Gupta",
+    "email": "vivek.gupta@example.com",
+    "empId": "EMP019",
+    "phone": "914011111124",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "AI/ML Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Deepika Yadav",
+    "email": "deepika.yadav@example.com",
+    "empId": "EMP020",
+    "phone": "913011111125",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Project Manager",
+    "status": "ACTIVE"
+  }
+]
+[
+  {
+    "fullName": "Suresh Patel",
+    "email": "suresh.patel@example.com",
+    "empId": "EMP021",
+    "phone": "912011111126",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Senior Software Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Kajal Verma",
+    "email": "kajal.verma@example.com",
+    "empId": "EMP022",
+    "phone": "911011111127",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Technical Writer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Rajesh Singh",
+    "email": "rajesh.singh@example.com",
+    "empId": "EMP023",
+    "phone": "919911111128",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "System Architect",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Ankita Gupta",
+    "email": "ankita.gupta@example.com",
+    "empId": "EMP024",
+    "phone": "918911111129",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Release Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Amar Yadav",
+    "email": "amar.yadav@example.com",
+    "empId": "EMP025",
+    "phone": "917911111130",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Performance Engineer",
+    "status": "ACTIVE"
+  }
+]
+[
+  {
+    "fullName": "Swati Sharma",
+    "email": "swati.sharma@example.com",
+    "empId": "EMP026",
+    "phone": "916911111131",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Security Analyst",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Kunal Verma",
+    "email": "kunal.verma@example.com",
+    "empId": "EMP027",
+    "phone": "915911111132",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Network Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Ritika Singh",
+    "email": "ritika.singh@example.com",
+    "empId": "EMP028",
+    "phone": "914911111133",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Automation Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Gaurav Gupta",
+    "email": "gaurav.gupta@example.com",
+    "empId": "EMP029",
+    "phone": "913911111134",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Machine Learning Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Nisha Yadav",
+    "email": "nisha.yadav@example.com",
+    "empId": "EMP030",
+    "phone": "912911111135",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Product Owner",
+    "status": "ACTIVE"
+  }
+]
+[
+  {
+    "fullName": "Vikrant Patel",
+    "email": "vikrant.patel@example.com",
+    "empId": "EMP031",
+    "phone": "911911111136",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Technical Consultant",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Payal Verma",
+    "email": "payal.verma@example.com",
+    "empId": "EMP032",
+    "phone": "919801111137",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Cloud Architect",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Sumit Singh",
+    "email": "sumit.singh@example.com",
+    "empId": "EMP033",
+    "phone": "918801111138",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Site Reliability Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Jyoti Gupta",
+    "email": "jyoti.gupta@example.com",
+    "empId": "EMP034",
+    "phone": "917801111139",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Data Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Rahul Yadav",
+    "email": "rahul.yadav@example.com",
+    "empId": "EMP035",
+    "phone": "916801111140",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Full Stack Developer",
+    "status": "ACTIVE"
+  }
+]
+[
+  {
+    "fullName": "Priya Patel",
+    "email": "priya.patel@example.com",
+    "empId": "EMP036",
+    "phone": "915801111141",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Mobile App Developer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Karan Verma",
+    "email": "karan.verma@example.com",
+    "empId": "EMP037",
+    "phone": "914801111142",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Embedded Systems Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Anjali Singh",
+    "email": "anjali.singh@example.com",
+    "empId": "EMP038",
+    "phone": "913801111143",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Technical Lead",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Amit Gupta",
+    "email": "amit.gupta@example.com",
+    "empId": "EMP039",
+    "phone": "912801111144",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Principal Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Shalini Yadav",
+    "email": "shalini.yadav@example.com",
+    "empId": "EMP040",
+    "phone": "911801111145",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Staff Software Engineer",
+    "status": "ACTIVE"
+  }
+]
+[
+  {
+    "fullName": "Rajiv Patel",
+    "email": "rajiv.patel@example.com",
+    "empId": "EMP041",
+    "phone": "919701111146",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Solutions Architect",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Kavita Verma",
+    "email": "kavita.verma@example.com",
+    "empId": "EMP042",
+    "phone": "918701111147",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Test Automation Lead",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Vineet Singh",
+    "email": "vineet.singh@example.com",
+    "empId": "EMP043",
+    "phone": "917701111148",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Release Manager",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Meena Gupta",
+    "email": "meena.gupta@example.com",
+    "empId": "EMP044",
+    "phone": "916701111149",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "UX Researcher",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Alok Yadav",
+    "email": "alok.yadav@example.com",
+    "empId": "EMP045",
+    "phone": "915701111150",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Technical Program Manager",
+    "status": "ACTIVE"
+  }
+]
+[
+  {
+    "fullName": "Seema Patel",
+    "email": "seema.patel@example.com",
+    "empId": "EMP046",
+    "phone": "914701111151",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Data Analyst",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Kapil Verma",
+    "email": "kapil.verma@example.com",
+    "empId": "EMP047",
+    "phone": "913701111152",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Infrastructure Engineer",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Ruchi Singh",
+    "email": "ruchi.singh@example.com",
+    "empId": "EMP048",
+    "phone": "912701111153",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Frontend Architect",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Sourabh Gupta",
+    "email": "sourabh.gupta@example.com",
+    "empId": "EMP049",
+    "phone": "911701111154",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "MALE",
+    "jobTitle": "Backend Architect",
+    "status": "ACTIVE"
+  },
+  {
+    "fullName": "Pooja Yadav",
+    "email": "pooja.yadav@example.com",
+    "empId": "EMP050",
+    "phone": "919601111155",
+    "password": "Harshit@123",
+    "department": "Engineering",
+    "gender": "FEMALE",
+    "jobTitle": "Software Architect",
+    "status": "ACTIVE"
+  }
+]
