@@ -31,18 +31,23 @@ const prisma = new PrismaClient()
 // Admin Authentication Controllers
 export const adminSignup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        // Validate and parse request body
+        // Validate and parse the request body against the admin signup schema.
         const { fullName, email, phone, password } = await adminSignupSchema.parseAsync(req.body)
 
-        // Check if admin already exists
+        // Check if an admin with the provided email already exists in the database.
         const existingAdmin = await prisma.admin.findUnique({
             where: { email }
         })
+
+        // If an admin with the given email is found, return an error response.
         if (existingAdmin) {
             return httpResponse(req, res, 400, apiMessages.auth.emailAlreadyInUse)
         }
+
+        // Hash the provided password before storing it in the database for security.
         const hashedPassword = await hashPassword(password)
-        // Create a new admin
+
+        // Create a new admin record in the database with the validated and hashed data.
         const newAdmin = await prisma.admin.create({
             data: {
                 fullName,
@@ -52,7 +57,7 @@ export const adminSignup = async (req: Request, res: Response, next: NextFunctio
             }
         })
 
-        // Structure the response data
+        // Structure the data to be sent in the response, excluding sensitive information.
         const userData = {
             id: newAdmin.id,
             fullName: newAdmin.fullName,
@@ -62,22 +67,25 @@ export const adminSignup = async (req: Request, res: Response, next: NextFunctio
             updatedAt: newAdmin.updatedAt
         }
 
-        // Use httpResponse for consistent success responses
+        // Return a successful HTTP response with a 201 status code and the created user data.
         return httpResponse(req, res, 201, apiMessages.admin.adminCreated, { user: userData })
     } catch (error) {
+        // Handle Zod validation errors. If the request body doesn't match the schema.
         if (error instanceof z.ZodError) {
+            // Handle Prisma-specific errors, like unique constraint violations.
             return httpResponse(req, res, 400, 'Validation Error', { errors: error.errors })
         }
 
         if (error instanceof PrismaClientKnownRequestError) {
+            // Check if the error code indicates a unique constraint violation (e.g., email already exists).
             if (error.code === 'P2002') {
-                // Unique constraint violation (e.g., email already exists)
                 return httpResponse(req, res, 400, apiMessages.auth.emailAlreadyInUse)
             }
+            // Log other known Prisma errors for debugging.
             logger.error(`Prisma error during admin signup: ${error.message}`, error)
             return httpError(next, error, req, 500)
         }
-
+        // Log any other unexpected errors that occurred during the signup process.
         logger.error(`Error during admin signup: ${error}`, error)
         return httpError(next, error, req, 500)
     }
@@ -359,45 +367,28 @@ export const createCompany = async (req: Request, res: Response, next: NextFunct
 /** Get all companies (with optional filters/pagination). */
 export const getCompanies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const DEFAULT_PAGE_SIZE = 10
-        const page = parseInt(req.query.page as string, 10) || 1
-        const pageSize = parseInt(req.query.pageSize as string, 10) || DEFAULT_PAGE_SIZE
-        const skip = (page - 1) * pageSize
-        const [companies, total] = await prisma.$transaction([
-            prisma.company.findMany({
-                select: {
-                    fullName: true,
-                    email: true,
-                    phone: true,
-                    username: true,
-                    companyId: true,
-                    plan: true,
-                    maxEmployees: true,
-                    accountType: true,
-                    role: true,
-                    status: true,
-                    isVerified: true
-                },
-                skip,
-                take: pageSize
-                // orderBy: {
-                //     fullName: 'asc', // Or any other field you want to sort by
-                //   },
-            }),
-            prisma.company.count()
-        ])
+        const companies = await prisma.company.findMany({
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+                phone: true,
+                username: true,
+                companyId: true,
+                status: true,
+                isVerified: true,
+                createdAt: true
+            }
+        })
 
         // Check if companies exist before sending a response
         if (!companies.length) {
             return httpResponse(req, res, 404, apiMessages.admin.noCompaniesFound, {
-                users: [],
-                total,
-                page,
-                pageSize
+                users: []
             })
         }
 
-        return httpResponse(req, res, 200, apiMessages.admin.companiesFound, { users: companies, total, page, pageSize })
+        return httpResponse(req, res, 200, apiMessages.admin.companiesFound, { users: companies })
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
             logger.error(`Prisma error during getCompanies: ${error.message}`, error)
@@ -448,7 +439,12 @@ export const getCompanyById = async (req: Request, res: Response, next: NextFunc
                 accountType: true,
                 role: true,
                 status: true,
-                isVerified: true
+                isVerified: true,
+                socialLinks: true,
+                companyLogo: true,
+                description: true,
+                website: true,
+                address: true
             }
         })
 
@@ -616,25 +612,31 @@ export const getCompanyEmployees = async (req: Request, res: Response, next: Nex
             return httpResponse(req, res, 400, apiMessages.error.invalidInput)
         }
 
-        const DEFAULT_PAGE_SIZE = 10
-        const page = parseInt(req.query.page as string, 10) || 1
-        const pageSize = parseInt(req.query.pageSize as string, 10) || DEFAULT_PAGE_SIZE
-        const skip = (page - 1) * pageSize
-
-        const [employees, total] = await prisma.$transaction([
-            prisma.employee.findMany({
-                where: { companyId: companyId },
-                skip,
-                take: pageSize
-            }),
-            prisma.employee.count()
-        ])
+        const employees = await prisma.employee.findMany({
+            where: { companyId: companyId },
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+                companyId: true,
+                phone: true,
+                jobTitle: true,
+                status: true,
+                isVerified: true,
+                createdAt: true,
+                company: {
+                    select: {
+                        fullName: true
+                    }
+                }
+            }
+        })
 
         if (!employees.length) {
-            return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound, { users: [], total, page, pageSize })
+            return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound, { users: [] })
         }
 
-        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees, total, page, pageSize })
+        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees })
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
             if (error.code === 'P2025') {
@@ -731,24 +733,31 @@ export const createEmployee = async (req: Request, res: Response, next: NextFunc
 /** Get all employees. */
 export const getEmployees = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const DEFAULT_PAGE_SIZE = 10
-        const page = parseInt(req.query.page as string, 10) || 1
-        const pageSize = parseInt(req.query.pageSize as string, 10) || DEFAULT_PAGE_SIZE
-        const skip = (page - 1) * pageSize
-        const [employees, total] = await prisma.$transaction([
-            prisma.employee.findMany({
-                skip,
-                take: pageSize
-            }),
-            prisma.employee.count()
-        ])
+        const employees = await prisma.employee.findMany({
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+                companyId: true,
+                phone: true,
+                jobTitle: true,
+                status: true,
+                isVerified: true,
+                createdAt: true,
+                company: {
+                    select: {
+                        fullName: true
+                    }
+                }
+            }
+        })
 
         // Check if employees array is empty, not if it's null/undefined
         if (!employees.length) {
-            return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound, { users: [], total, page, pageSize }) // Return empty array with 200 OK
+            return httpResponse(req, res, 404, apiMessages.employee.employeesNotFound, { users: [] }) // Return empty array with 200 OK
         }
 
-        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees, total, page, pageSize }) // Return data in object
+        return httpResponse(req, res, 200, apiMessages.employee.employeesFound, { users: employees }) // Return data in object
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
             logger.error(`Prisma error during getEmployees: ${error.message}`, error)
@@ -927,24 +936,24 @@ export const changeEmployeeStatus = async (req: Request, res: Response, next: Ne
 /** Get all individuals. */
 export const getIndividuals = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const DEFAULT_PAGE_SIZE = 10
-        const page = parseInt(req.query.page as string, 10) || 1
-        const pageSize = parseInt(req.query.pageSize as string, 10) || DEFAULT_PAGE_SIZE
-        const skip = (page - 1) * pageSize
-        const [individuals, total] = await prisma.$transaction([
-            prisma.individual.findMany({
-                skip,
-                take: pageSize
-            }),
-            prisma.individual.count()
-        ])
+        const individuals = await prisma.individual.findMany({
+            select: {
+                id: true,
+                fullName: true,
+                email: true,
+                phone: true,
+                status: true,
+                isVerified: true,
+                createdAt: true
+            }
+        })
 
         // Check if companies exist before sending a response
         if (!individuals.length) {
-            return httpResponse(req, res, 404, apiMessages.user.usersNotFound, { users: [], total, page, pageSize })
+            return httpResponse(req, res, 404, apiMessages.user.usersNotFound, { users: [] })
         }
 
-        return httpResponse(req, res, 200, apiMessages.user.usersFound, { users: individuals, total, page, pageSize })
+        return httpResponse(req, res, 200, apiMessages.user.usersFound, { users: individuals })
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError) {
             logger.error(`Prisma error during getIndividuals: ${error.message}`, error)
